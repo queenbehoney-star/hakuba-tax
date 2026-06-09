@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="宿泊税">
+<meta name="theme-color" content="#ffffff">
+<title>白馬 宿泊税サポート</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2563EB;--blue-l:#EFF6FF;--blue-m:#BFDBFE;--blue-d:#1E40AF;
+  --green:#15803D;--green-l:#F0FDF4;--green-m:#BBF7D0;
+  --red:#DC2626;--red-l:#FEF2F2;
+  --amber:#B45309;--amber-l:#FFFBEB;
+  --white:#fff;--bg:#F1F5F9;
+  --g50:#F8FAFC;--g100:#F1F5F9;--g200:#E2E8F0;
+  --g300:#CBD5E1;--g400:#94A3B8;--g500:#64748B;
+  --g600:#475569;--g700:#334155;--g900:#0F172A;
+  --r:14px;--rs:10px;
+  --sh:0 1px 3px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.04);
+  --sh2:0 2px 10px rgba(0,0,0,.07);
+  --font:'Noto Sans JP',-apple-system,'Hiragino Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);color:var(--g900);background:var(--g100)}
+
+/* Shell */
+.app{height:100%;display:flex;flex-direction:column;overflow:hidden}
+.screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:72px}
+.screen{display:none}
+.screen.active{display:block;animation:fi .18s ease}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* ── Header ── */
+.hdr{
+  background:#fff;
+  padding:12px 18px 10px;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid #E2E8F0;
+  flex-shrink:0;
+}
+.hdr-logo{
+  width:36px;height:36px;
+  background:#EFF6FF;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.hdr-logo svg{width:20px;height:20px;stroke:#2563EB;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hdr-text{flex:1}
+.hdr-title{font-size:16px;font-weight:700;color:#0F172A;letter-spacing:-.3px}
+.hdr-sub{font-size:11px;color:#94A3B8;margin-top:1px;font-weight:400}
+.hdr-menu{
+  width:34px;height:34px;background:#F8FAFC;border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  cursor:pointer;border:1px solid #E2E8F0;flex-shrink:0;
+}
+.hdr-menu span{width:12px;height:1.5px;background:#64748B;border-radius:1px;display:block}
+
+.sub-hdr{background:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #E2E8F0;flex-shrink:0}
+.back-btn{width:32px;height:32px;border-radius:50%;background:#F8FAFC;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.back-btn svg{width:16px;height:16px;stroke:#334155;fill:none;stroke-width:2.5;stroke-linecap:round}
+.sub-title{font-size:15px;font-weight:700;color:#0F172A}
+
+/* ── Tab bar ── */
+.tab-bar{
+  background:#fff;border-top:1px solid #E2E8F0;
+  display:flex;flex-shrink:0;
+  padding:6px 0 calc(6px + env(safe-area-inset-bottom));
+}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;color:#94A3B8;padding:4px 0}
+.tab-btn.on{color:#2563EB}
+.tab-btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab-btn span{font-size:10px;font-weight:600}
+
+/* ── Home ── */
+.home-body{padding:14px 16px 0}
+
+/* Deadline card */
+.dl-card{
+  background:#fff;border-radius:16px;
+  padding:16px 18px;
+  display:flex;align-items:center;gap:0;
+  box-shadow:var(--sh2);
+  margin-bottom:12px;
+  border:1px solid #E2E8F0;
+}
+.dl-left{flex:1;display:flex;align-items:center;gap:12px;border-right:1px solid #E2E8F0;padding-right:16px;margin-right:16px}
+.dl-icon{width:40px;height:40px;background:#EFF6FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dl-icon svg{width:20px;height:20px;stroke:#2563EB;fill:none;stroke-width:1.8;stroke-linecap:round}
+.dl-lbl{font-size:10px;color:#94A3B8;font-weight:600;margin-bottom:3px;letter-spacing:.3px}
+.dl-date{font-size:22px;font-weight:800;color:#0F172A;line-height:1;letter-spacing:-.5px}
+.dl-remain{font-size:11px;color:#64748B;margin-top:4px;font-weight:500}
+.dl-right{display:flex;flex-direction:column;gap:8px}
+.dl-row{display:flex;align-items:center;gap:6px}
+.dl-row-ic{width:24px;height:24px;background:#F8FAFC;border-radius:6px;display:flex;align-items:center;justify-content:center;border:1px solid #E2E8F0}
+.dl-row-ic svg{width:12px;height:12px;stroke:#64748B;fill:none;stroke-width:1.8;stroke-linecap:round}
+.dl-row-lbl{font-size:11px;color:#64748B;font-weight:500}
+.pill{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.pill-ok{background:#DCFCE7;color:#15803D}
+.pill-warn{background:#FEF9C3;color:#A16207}
+.pill-red{background:#FEE2E2;color:#DC2626}
+
+/* Menu grid */
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mc{
+  background:#fff;border-radius:16px;
+  padding:16px 14px 14px;
+  display:flex;flex-direction:column;
+  cursor:pointer;box-shadow:var(--sh);
+  transition:transform .12s;
+  border:1px solid #E2E8F0;
+  position:relative;overflow:hidden;
+}
+.mc:active{transform:scale(.97)}
+.mc.urgent{border-color:#FECACA}
+.mc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.mc-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mc-icon svg{width:22px;height:22px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mc-arrow{margin-top:2px}
+.mc-arrow svg{width:14px;height:14px;stroke:#CBD5E1;fill:none;stroke-width:2;stroke-linecap:round}
+.mc-title{font-size:14px;font-weight:700;color:#0F172A;margin-bottom:4px}
+.mc-desc{font-size:11px;color:#94A3B8;line-height:1.5;font-weight:400}
+.mc-badge{position:absolute;top:10px;right:10px;background:#DC2626;color:#fff;border-radius:10px;font-size:10px;font-weight:700;padding:2px 7px}
+
+/* Info bar */
+.info-bar{
+  background:#fff;border-radius:14px;padding:12px 14px;
+  display:flex;align-items:center;gap:10px;
+  margin:12px 0 4px;box-shadow:var(--sh);
+  border:1px solid #E2E8F0;cursor:default;
+}
+.info-ic{width:34px;height:34px;background:#2563EB;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.info-ic svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
+.info-main{font-size:11px;font-weight:600;color:#334155}
+.info-sub{font-size:11px;color:#2563EB;font-weight:500;margin-top:2px}
+
+/* ── Cards ── */
+.sec{padding:14px 16px 0}
+.card{background:#fff;border-radius:16px;box-shadow:var(--sh2);overflow:hidden;margin-bottom:12px;border:1px solid #E2E8F0}
+.card-hdr{padding:13px 16px 11px;border-bottom:1px solid #E2E8F0;font-size:13px;font-weight:700;color:#475569;display:flex;align-items:center;gap:7px}
+.card-hdr svg{width:16px;height:16px;stroke:#2563EB;fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0}
+.card-body{padding:14px 16px}
+
+/* Forms */
+.fg{margin-bottom:13px}
+.fl{display:block;font-size:11px;font-weight:600;color:#64748B;margin-bottom:4px;letter-spacing:.2px}
+.req{color:#DC2626;margin-left:2px}
+.fi,.fs{width:100%;padding:11px 13px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:15px;font-family:var(--font);background:#fff;color:#0F172A;appearance:none;outline:none;transition:border-color .15s;font-weight:400}
+.fi:focus,.fs:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.fi.err{border-color:#DC2626}
+.ferr{font-size:11px;color:#DC2626;margin-top:3px;font-weight:600;display:none}
+.ferr.show{display:block}
+.fhint{font-size:11px;color:#94A3B8;margin-top:3px;line-height:1.5}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.fsep{font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:.8px;text-transform:uppercase;margin:15px 0 8px;padding-bottom:6px;border-bottom:1px solid #E2E8F0}
+
+/* Toggle */
+.trow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E2E8F0}
+.trow:last-child{border-bottom:none}
+.tlabel{font-size:14px;font-weight:600;color:#0F172A}
+.tsub{font-size:11px;color:#94A3B8;margin-top:2px}
+.tog{position:relative;width:44px;height:25px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tog-sl{position:absolute;inset:0;background:#CBD5E1;border-radius:13px;cursor:pointer;transition:background .2s}
+.tog-sl::before{content:'';position:absolute;width:19px;height:19px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.tog input:checked+.tog-sl{background:#2563EB}
+.tog input:checked+.tog-sl::before{transform:translateX(19px)}
+
+/* Buttons */
+.btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:var(--font);cursor:pointer;transition:transform .12s,opacity .15s;letter-spacing:.1px}
+.btn:active{transform:scale(.97);opacity:.87}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-blue{background:#2563EB;color:#fff}
+.btn-green{background:#16A34A;color:#fff}
+.btn-out{background:#fff;color:#2563EB;border:1.5px solid #2563EB}
+.btn-ghost{background:#F8FAFC;color:#64748B;border:1px solid #E2E8F0}
+.btn+.btn{margin-top:8px}
+.btn-sm{width:auto;padding:7px 14px;font-size:13px}
+.btn-row{display:flex;gap:8px}.btn-row .btn{flex:1}
+
+/* Tax preview */
+.tax-prev{background:#EFF6FF;border-radius:10px;padding:14px;text-align:center;margin-top:12px;border:1px solid #BFDBFE}
+.tp-lbl{font-size:10px;color:#1E40AF;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.tp-amt{font-size:30px;font-weight:800;color:#1E40AF;letter-spacing:-1px}
+.tp-det{font-size:11px;color:#2563EB;margin-top:3px;line-height:1.5}
+
+/* Booking list */
+.bk{padding:12px 0;border-bottom:1px solid #E2E8F0;cursor:pointer}
+.bk:last-child{border-bottom:none}
+.bk:active{opacity:.65}
+.bk-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.bk-name{font-size:14px;font-weight:700;color:#0F172A}
+.bk-meta{font-size:11px;color:#94A3B8;margin-top:3px;line-height:1.5}
+.bk-tax{font-size:14px;font-weight:800;color:#1E40AF}
+.st{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;margin-top:3px}
+.st-unpaid{background:#FEE2E2;color:#DC2626}
+.st-sent{background:#FFFBEB;color:#B45309}
+.st-paid{background:#DCFCE7;color:#15803D}
+.st-cash{background:#EFF6FF;color:#1E40AF}
+.empty{color:#94A3B8;text-align:center;padding:28px 20px;font-size:13px;line-height:1.7}
+
+/* Pay grid */
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.pay-card{background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;padding:13px 10px;text-align:center;cursor:pointer;transition:all .15s}
+.pay-card:active{transform:scale(.96)}
+.pay-card.sel{border-color:#2563EB;background:#EFF6FF}
+.pay-card-icon{font-size:22px;margin-bottom:5px}
+.pay-card-name{font-size:12px;font-weight:700;color:#0F172A}
+
+/* Message */
+.msg-lang{font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.msg-box{background:#F8FAFC;border-radius:10px;padding:12px;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-all;border:1px solid #E2E8F0;margin-bottom:8px;font-weight:400}
+
+/* QR */
+.qr-wrap{background:#fff;border:1.5px solid #E2E8F0;border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:12px}
+.qr-amt{font-size:22px;font-weight:800;color:#1E40AF}
+.qr-note{font-size:11px;color:#94A3B8;text-align:center;line-height:1.6}
+
+/* Notice */
+.notice{border-radius:10px;padding:11px 13px;font-size:12px;line-height:1.6;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start;font-weight:500}
+.notice svg{width:14px;height:14px;flex-shrink:0;margin-top:1px;fill:none;stroke-width:2;stroke-linecap:round}
+.notice-blue{background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE}
+.notice-blue svg{stroke:#2563EB}
+.notice-red{background:#FEF2F2;color:#DC2626;border:1px solid #FECACA}
+.notice-red svg{stroke:#DC2626}
+.notice-amber{background:#FFFBEB;color:#B45309;border:1px solid #FDE68A}
+.notice-amber svg{stroke:#B45309}
+.notice-green{background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0}
+.notice-green svg{stroke:#15803D}
+
+/* Status */
+.st-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid #E2E8F0;gap:13px}
+.st-row:last-child{border-bottom:none}
+.st-dot{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.st-dot svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round}
+
+/* Tax table */
+.ttbl{width:100%;border-collapse:collapse;font-size:12px}
+.ttbl th,.ttbl td{padding:8px 6px;text-align:left;border-bottom:1px solid #E2E8F0}
+.ttbl th{font-size:10px;color:#94A3B8;font-weight:700;background:#F8FAFC}
+.ttbl .tot td{font-weight:800;font-size:13px;color:#1E40AF;background:#EFF6FF}
+
+/* Unsaved bar */
+.unsaved-bar{background:#D97706;display:none;align-items:center;justify-content:space-between;padding:8px 18px;flex-shrink:0}
+.unsaved-bar.show{display:flex}
+.unsaved-txt{font-size:12px;font-weight:700;color:#fff}
+.unsaved-save{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;font-weight:700;font-size:12px;padding:4px 12px;border-radius:7px;cursor:pointer;font-family:var(--font)}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:200;display:flex;align-items:flex-end}
+.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding:0 18px calc(40px + env(safe-area-inset-bottom))}
+.modal-pill{width:36px;height:4px;background:#E2E8F0;border-radius:2px;margin:12px auto 16px}
+.modal-title{font-size:17px;font-weight:800;color:#0F172A;margin-bottom:3px}
+.modal-sub{font-size:12px;color:#94A3B8;margin-bottom:16px;line-height:1.5}
+
+/* Setup */
+.setup-bg{position:fixed;inset:0;z-index:300;overflow-y:auto;background:#F1F5F9}
+.setup-hero{
+  position:relative;background:#fff;
+  padding:40px 24px 28px;
+  display:flex;flex-direction:column;align-items:flex-start;gap:0;
+  border-bottom:1px solid #E2E8F0;
+}
+.setup-logo-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.setup-logo-ic{width:44px;height:44px;background:#EFF6FF;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.setup-logo-ic svg{width:24px;height:24px;stroke:#2563EB;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.setup-logo-name{font-size:18px;font-weight:800;color:#0F172A;letter-spacing:-.3px}
+.setup-hero-h{font-size:22px;font-weight:800;color:#0F172A;line-height:1.3;margin-bottom:6px;letter-spacing:-.5px}
+.setup-hero-p{font-size:13px;color:#64748B;line-height:1.6;font-weight:400}
+.setup-body{padding:20px 18px 50px}
+.setup-sec{font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:1px;text-transform:uppercase;margin:18px 0 8px}
+.setup-warn{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:11px 13px;font-size:12px;color:#DC2626;font-weight:500;line-height:1.6;margin-bottom:14px;display:flex;gap:8px}
+.setup-warn svg{width:14px;height:14px;flex-shrink:0;margin-top:2px;stroke:#DC2626;fill:none;stroke-width:2;stroke-linecap:round}
+
+/* Toast */
+.toast{position:fixed;bottom:calc(64px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(100px);background:#0F172A;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;transition:transform .25s;z-index:999;white-space:nowrap;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Print */
+@media print{
+  body{margin:0;padding:0}
+  body > *{display:none!important}
+  #printWrap{display:block!important}
+  #printWrap *{display:unset}
+  #printWrap table{display:table!important}
+  #printWrap tr{display:table-row!important}
+  #printWrap td,#printWrap th{display:table-cell!important}
+  #printWrap div,#printWrap p{display:block!important}
+  @page{size:A4 portrait;margin:15mm 15mm 15mm 20mm}
+}
+
+#printWrap{font-family:'MS Mincho','Yu Mincho','Hiragino Mincho Pro',serif;color:#000;font-size:9pt;line-height:1.4}
+.ptable{width:100%;border-collapse:collapse;font-size:8.5pt}.ptable th,.ptable td{border:1px solid #000;padding:2mm 2.5mm;vertical-align:middle}.ptable th{background:#e8e8e8;text-align:center;font-weight:bold}
+.pcenter{text-align:center}.pright{text-align:right}.pbold{font-weight:bold}.ptotal{background:#f0f0f0;font-weight:bold}
+.pnote{font-size:7pt;margin-top:3mm;line-height:1.8}.pdoc-title{border:2px solid #000;text-align:center;font-size:13pt;font-weight:bold;padding:3mm;margin-bottom:4mm;letter-spacing:4px}
+.pshoshiki{text-align:right;font-size:7.5pt;margin-bottom:1mm}.pheader{font-size:8.5pt;margin-bottom:4mm;line-height:2}.pheader-line{border-bottom:1px solid #000;margin-bottom:1mm;padding-bottom:1mm}
+.page-break{page-break-after:always}
+</style>
+</head>
+<body>
+
+<div id="printWrap" style="display:none;position:fixed;inset:0;background:#fff;z-index:9999;overflow:auto;padding:0"><div id="printArea" style="width:100%"></div></div>
+
+<!-- ══ SETUP ══ -->
+<div class="setup-bg" id="setupBg" style="display:none">
+  <div class="setup-hero">
+    <div class="setup-logo-row">
+      <div class="setup-logo-ic">
+        <svg viewBox="0 0 24 24"><polygon points="12,3 2,20 22,20"/><polygon points="19,9 14,20 24,20" opacity=".45"/></svg>
+      </div>
+      <div class="setup-logo-name">白馬 宿泊税サポート</div>
+    </div>
+    <div class="setup-hero-h">はじめに宿の情報を<br>登録してください</div>
+    <div class="setup-hero-p">白馬村の宿泊税申告をスマホだけで完結できます</div>
+  </div>
+
+  <div class="setup-body">
+    <div class="setup-warn">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>証票番号・課税番号・施設名は役場提出書類に自動反映されます。正確に入力してください。</span>
+    </div>
+
+    <div class="setup-sec">宿の基本情報</div>
+    <div class="fg"><label class="fl">宿・施設名<span class="req">必須</span></label>
+      <input type="text" class="fi" id="su-facility" placeholder="例: 白馬山荘">
+      <div class="ferr" id="su-facility-err">施設名を入力してください</div></div>
+    <div class="fg"><label class="fl">所在地</label>
+      <input type="text" class="fi" id="su-address" placeholder="長野県北安曇郡白馬村..."></div>
+    <div class="fg"><label class="fl">氏名または法人名</label>
+      <input type="text" class="fi" id="su-owner" placeholder="山田 太郎"></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">電話番号</label>
+        <input type="tel" class="fi" id="su-phone" placeholder="0261-XX-XXXX"></div>
+      <div class="fg"><label class="fl">担当者名（法人のみ）</label>
+        <input type="text" class="fi" id="su-staff" placeholder="任意"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">証票番号<span class="req">必須</span></label>
+        <input type="text" class="fi" id="su-ticket" placeholder="役場発行の番号">
+        <div class="fhint">役場から届いた証票に記載の番号</div>
+        <div class="ferr" id="su-ticket-err">証票番号を入力してください</div></div>
+      <div class="fg"><label class="fl">課税番号<span class="req">必須</span></label>
+        <input type="text" class="fi" id="su-taxnum" placeholder="課税番号">
+        <div class="fhint">届出時に通知された番号</div>
+        <div class="ferr" id="su-taxnum-err">課税番号を入力してください</div></div>
+    </div>
+
+    <div class="setup-sec">お支払い方法</div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-body" style="padding:0 4px">
+        <div class="trow"><div><div class="tlabel">Square</div><div class="tsub">QRコード決済</div></div>
+          <label class="tog"><input type="checkbox" id="su-sq-on" onchange="spT('su-sq')"><span class="tog-sl"></span></label></div>
+        <div id="su-sq-area" style="display:none;padding:6px 0 10px">
+          <input type="url" class="fi" id="su-sq-url" placeholder="https://square.link/u/..."></div>
+        <div class="trow"><div><div class="tlabel">PayPay</div><div class="tsub">QRコード決済</div></div>
+          <label class="tog"><input type="checkbox" id="su-pp-on" onchange="spT('su-pp')"><span class="tog-sl"></span></label></div>
+        <div id="su-pp-area" style="display:none;padding:6px 0 10px">
+          <input type="url" class="fi" id="su-pp-url" placeholder="https://qr.paypay.ne.jp/..."></div>
+        <div class="trow"><div><div class="tlabel">LINE Pay</div></div>
+          <label class="tog"><input type="checkbox" id="su-lp-on" onchange="spT('su-lp')"><span class="tog-sl"></span></label></div>
+        <div id="su-lp-area" style="display:none;padding:6px 0 10px">
+          <input type="url" class="fi" id="su-lp-url" placeholder="https://line.me/pay/..."></div>
+        <div class="trow"><div><div class="tlabel">銀行振込</div><div class="tsub">口座番号を案内</div></div>
+          <label class="tog"><input type="checkbox" id="su-bank-on" onchange="spT('su-bank')"><span class="tog-sl"></span></label></div>
+        <div id="su-bank-area" style="display:none;padding:6px 0 10px">
+          <div class="fg"><label class="fl">銀行名・支店名</label>
+            <input type="text" class="fi" id="su-bank-name" placeholder="八十二銀行 白馬支店">
+            <div class="ferr" id="su-bank-name-err">銀行名を入力してください</div></div>
+          <div class="frow">
+            <div class="fg"><label class="fl">口座種別</label>
+              <select class="fs" id="su-bank-type"><option>普通</option><option>当座</option></select></div>
+            <div class="fg"><label class="fl">口座番号（数字のみ）</label>
+              <input type="text" class="fi" id="su-bank-num" placeholder="1234567" inputmode="numeric">
+              <div class="ferr" id="su-bank-num-err">数字のみで入力してください</div></div>
+          </div>
+          <div class="fg"><label class="fl">口座名義（カナ）</label>
+            <input type="text" class="fi" id="su-bank-holder" placeholder="シラウマ タロウ">
+            <div class="ferr" id="su-bank-holder-err">口座名義を入力してください</div></div>
+        </div>
+        <div class="trow"><div><div class="tlabel">現金（現地払い）</div></div>
+          <label class="tog"><input type="checkbox" id="su-cash-on"><span class="tog-sl"></span></label></div>
+      </div>
+    </div>
+    <div style="margin-top:20px">
+      <button class="btn btn-blue" onclick="saveSetup()">登録してアプリを始める</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="app">
+  <!-- Top header -->
+  <div class="hdr" id="topHdr">
+    <div class="hdr-logo">
+      <svg viewBox="0 0 24 24"><polygon points="12,3 2,20 22,20"/><polygon points="19,9 14,20 24,20" opacity=".4"/></svg>
+    </div>
+    <div class="hdr-text">
+      <div class="hdr-title">白馬 宿泊税サポート</div>
+      <div class="hdr-sub">白馬村の宿泊事業者さまをサポートします</div>
+    </div>
+    <div class="hdr-menu" onclick="nav('settings')">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Sub header -->
+  <div class="sub-hdr" id="subHdr" style="display:none">
+    <button class="back-btn" onclick="goBack()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="sub-title" id="subTitle"></div><div id="subHdrTitle" style="display:none"></div>
+  </div>
+
+  <div class="unsaved-bar" id="unsavedBar">
+    <span class="unsaved-txt">変更が保存されていません</span>
+    <button class="unsaved-save" onclick="saveSettings()">今すぐ保存</button>
+  </div>
+
+  <div class="screens" id="screens">
+
+    <!-- HOME -->
+    <div class="screen active" id="scr-home">
+      <div class="home-body">
+        <div class="dl-card">
+          <div class="dl-left">
+            <div class="dl-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div>
+              <div class="dl-lbl">提出期限</div>
+              <div class="dl-date" id="dlDate">-- 月 -- 日</div>
+              <div class="dl-remain" id="dlRemain">あと -- 日</div>
+              <div style="margin-top:6px;font-size:11px;color:#94A3B8" id="homeMonth"></div>
+              <div style="font-size:16px;font-weight:800;color:#2563EB;margin-top:1px" id="homeAmt">¥0</div>
+            </div>
+          </div>
+          <div class="dl-right">
+            <div class="dl-row">
+              <div class="dl-row-ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+              <span class="dl-row-lbl">申告状況</span>
+              <span class="pill" id="stSubmit">未提出</span>
+            </div>
+            <div class="dl-row">
+              <div class="dl-row-ic"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+              <span class="dl-row-lbl">納付状況</span>
+              <span class="pill" id="stPay">未納付</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-grid">
+          <div class="mc" onclick="nav('input')">
+            <div class="mc-top">
+              <div class="mc-icon" style="background:#EFF6FF"><svg stroke="#2563EB" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg></div>
+              <div class="mc-arrow"><svg viewBox="0 0 24 24" stroke="#CBD5E1"><polyline points="9 18 15 12 9 6"/></svg></div>
+            </div>
+            <div class="mc-title">予約を追加</div>
+            <div class="mc-desc">宿泊情報を入力して予約を追加します</div>
+          </div>
+          <div class="mc" onclick="nav('calc')">
+            <div class="mc-top">
+              <div class="mc-icon" style="background:#EFF6FF"><svg stroke="#2563EB" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/></svg></div>
+              <div class="mc-arrow"><svg viewBox="0 0 24 24" stroke="#CBD5E1"><polyline points="9 18 15 12 9 6"/></svg></div>
+            </div>
+            <div class="mc-title">税額を確認</div>
+            <div class="mc-desc">登録した予約の宿泊税額を確認できます</div>
+          </div>
+          <div class="mc" id="payMc" onclick="nav('payment')">
+            <div class="mc-top">
+              <div class="mc-icon" style="background:#EFF6FF"><svg stroke="#2563EB" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+              <div class="mc-arrow"><svg viewBox="0 0 24 24" stroke="#CBD5E1"><polyline points="9 18 15 12 9 6"/></svg></div>
+            </div>
+            <div class="mc-title">支払い案内</div>
+            <div class="mc-desc">納付書の確認や支払い方法の案内</div>
+            <span class="mc-badge" id="unpaidBadge" style="display:none">0</span>
+          </div>
+          <div class="mc" onclick="nav('status')">
+            <div class="mc-top">
+              <div class="mc-icon" style="background:#EFF6FF"><svg stroke="#2563EB" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <div class="mc-arrow"><svg viewBox="0 0 24 24" stroke="#CBD5E1"><polyline points="9 18 15 12 9 6"/></svg></div>
+            </div>
+            <div class="mc-title">月次申告</div>
+            <div class="mc-desc">今月分の宿泊税を申告します</div>
+          </div>
+          <div class="mc" onclick="nav('docs')">
+            <div class="mc-top">
+              <div class="mc-icon" style="background:#EFF6FF"><svg stroke="#2563EB" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
+              <div class="mc-arrow"><svg viewBox="0 0 24 24" stroke="#CBD5E1"><polyline points="9 18 15 12 9 6"/></svg></div>
+            </div>
+            <div class="mc-title">PDF出力</div>
+            <div class="mc-desc">申告書や一覧表をPDFで出力します</div>
+          </div>
+          <div class="mc" onclick="nav('nostay')">
+            <div class="mc-top">
+              <div class="mc-icon" style="background:#EFF6FF"><svg stroke="#2563EB" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+              <div class="mc-arrow"><svg viewBox="0 0 24 24" stroke="#CBD5E1"><polyline points="9 18 15 12 9 6"/></svg></div>
+            </div>
+            <div class="mc-title">今月は宿泊なし</div>
+            <div class="mc-desc">今月の宿泊がないことをご報告します</div>
+          </div>
+        </div>
+
+        <div class="info-bar">
+          <div class="info-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div style="flex:1">
+            <div class="info-main">ご不明な点はサポート窓口までご連絡ください</div>
+            <div class="info-sub">白馬村役場 税務課　0261-72-5000（平日 9:00〜17:00）</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 予約入力 -->
+    <div class="screen" id="scr-input">
+      <div class="sec">
+        <div class="card">
+          <div class="card-body">
+            <div class="fg"><label class="fl">ゲスト名（代表者）</label>
+              <input type="text" class="fi" id="bk-name" placeholder="例: 田中 様 / Mr. Tanaka"></div>
+            <div class="frow">
+              <div class="fg"><label class="fl">チェックイン</label><input type="date" class="fi" id="bk-ci" oninput="calcPreview()"></div>
+              <div class="fg"><label class="fl">チェックアウト</label><input type="date" class="fi" id="bk-co" oninput="calcPreview()"></div>
+            </div>
+            <div class="fsep">宿泊人数</div>
+            <div class="frow3">
+              <div class="fg"><label class="fl">大人（有料）</label><input type="number" class="fi" id="bk-adult" value="1" min="0" oninput="calcPreview()"></div>
+              <div class="fg"><label class="fl">子ども有料</label><input type="number" class="fi" id="bk-child" value="0" min="0" oninput="calcPreview()"></div>
+              <div class="fg"><label class="fl">無料添い寝</label><input type="number" class="fi" id="bk-free" value="0" min="0" oninput="calcPreview()"></div>
+            </div>
+            <div class="fhint" style="margin-top:-8px;margin-bottom:12px">無料添い寝・乳児は宿泊税の計算人数に含みません</div>
+            <div class="fg"><label class="fl">1室1泊の合計料金（円）</label>
+              <input type="number" class="fi" id="bk-price" placeholder="例: 30000" oninput="calcPreview()">
+              <div class="fhint">有料人数で割って1人1泊料金を自動計算します</div></div>
+            <div class="frow">
+              <div class="fg"><label class="fl">予約経路</label>
+                <select class="fs" id="bk-source"><option value="direct">直接予約</option><option value="airbnb">Airbnb</option><option value="booking">Booking.com</option><option value="other">その他</option></select></div>
+              <div class="fg"><label class="fl">支払い方法</label><select class="fs" id="bk-paymethod"></select></div>
+            </div>
+            <div class="trow">
+              <div><div class="tlabel">課税免除（外国大使等）</div><div class="tsub">通常の宿泊には使用しません</div></div>
+              <label class="tog"><input type="checkbox" id="bk-exempt" onchange="calcPreview()"><span class="tog-sl"></span></label>
+            </div>
+            <div class="tax-prev">
+              <div class="tp-lbl">この予約の宿泊税（見込み）</div>
+              <div class="tp-amt" id="previewAmt">-- 円</div>
+              <div class="tp-det" id="previewDetail"></div>
+            </div>
+            <div style="margin-top:16px">
+              <button class="btn btn-blue" onclick="saveBooking()">この予約を保存する</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 支払い管理 -->
+    <div class="screen" id="scr-payment">
+      <div class="sec">
+        <div class="card">
+          <div class="card-hdr" style="color:#DC2626"><svg stroke="#DC2626" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4"/><polyline points="22,6 12,13 2,6"/></svg>未払い <span class="st st-unpaid" id="unpaidCount" style="margin-left:4px">0件</span></div>
+          <div class="card-body" id="unpaidList"><div class="empty">未払いの予約はありません</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr" style="color:#15803D"><svg stroke="#15803D" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>支払済み・その他</div>
+          <div class="card-body" id="paidList"><div class="empty">予約がありません</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 税額確認 -->
+    <div class="screen" id="scr-calc">
+      <div class="sec">
+        <div class="card">
+          <div class="card-hdr"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/></svg><span id="calcHdr">今月の宿泊税内訳</span></div>
+          <div class="card-body">
+            <table class="ttbl">
+              <thead><tr><th>区分</th><th>料金帯・税率</th><th>泊数</th><th>税額</th></tr></thead>
+              <tbody>
+                <tr><td>a</td><td id="rA"></td><td id="cA">0泊</td><td id="tA">¥0</td></tr>
+                <tr><td>b</td><td id="rB"></td><td id="cB">0泊</td><td id="tB">¥0</td></tr>
+                <tr><td>c</td><td id="rC"></td><td id="cC">0泊</td><td id="tC">¥0</td></tr>
+                <tr><td>d</td><td id="rD"></td><td id="cD">0泊</td><td id="tD">¥0</td></tr>
+                <tr><td colspan="2" style="color:#94A3B8">6千円未満（非課税）</td><td id="cBa">0泊</td><td>—</td></tr>
+                <tr><td colspan="2" style="color:#94A3B8">課税免除（外国大使等）</td><td id="cBb">0泊</td><td>—</td></tr>
+                <tr class="tot"><td colspan="2">合計</td><td id="cTot">0泊</td><td id="tTot">¥0</td></tr>
+              </tbody>
+            </table>
+            <div class="tax-prev" style="margin-top:14px">
+              <div class="tp-lbl">今月 納入すべき金額</div>
+              <div class="tp-amt" id="calcTotal">0 円</div>
+            </div>
+            <div style="font-size:11px;color:#94A3B8;margin-top:10px;line-height:1.6">※税率には長野県宿泊税（1人1泊150円）を含みます<br>※令和11年6月以降は新税率が自動適用されます</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>今月の予約一覧</div>
+          <div class="card-body" id="calcList"><div class="empty">今月の予約がありません</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PDF出力 -->
+    <div class="screen" id="scr-docs">
+      <div class="sec">
+        <div class="card">
+          <div class="card-body">
+            <div class="notice notice-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>書類を選んで「PDF出力」を押すとA4で印刷・PDF保存できます。</span></div>
+            <div class="trow"><div><div class="tlabel">宿泊税納入申告書（様式第2号）</div><div class="tsub">毎月必須</div></div>
+              <label class="tog"><input type="checkbox" id="doc-f2" checked><span class="tog-sl"></span></label></div>
+            <div class="trow"><div><div class="tlabel">宿泊税月計表</div><div class="tsub">申告書に添付必須</div></div>
+              <label class="tog"><input type="checkbox" id="doc-monthly" checked><span class="tog-sl"></span></label></div>
+            <div class="trow"><div><div class="tlabel">還付・納入義務免除申請書（様式第10号）</div><div class="tsub">該当月のみ・手動入力欄あり</div></div>
+              <label class="tog"><input type="checkbox" id="doc-f10"><span class="tog-sl"></span></label></div>
+            <div style="margin-top:16px"><button class="btn btn-blue" onclick="printDocs()">PDF出力 / 印刷</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 宿泊なし -->
+    <div class="screen" id="scr-nostay">
+      <div class="sec">
+        <div class="card">
+          <div class="card-body">
+            <div class="notice notice-amber"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>宿泊者がいない月でも0円の申告書提出が必要です。</span></div>
+            <div style="text-align:center;padding:24px 0 18px">
+              <div style="width:64px;height:64px;background:#EFF6FF;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div style="font-size:16px;font-weight:700;color:#0F172A">今月のご宿泊はありませんでした</div>
+              <div style="font-size:12px;color:#94A3B8;margin-top:4px">No guests this month</div>
+            </div>
+            <button class="btn btn-blue" onclick="printNoStay()">0円申告書をPDF出力</button>
+            <button class="btn btn-ghost" style="margin-top:8px" onclick="goBack()">戻る</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 月次申告 -->
+    <div class="screen" id="scr-status">
+      <div class="sec">
+        <div class="card">
+          <div class="card-hdr"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>申告・納付の状況</div>
+          <div class="card-body">
+            <div style="font-size:11px;color:#94A3B8;margin-bottom:13px" id="statusMonth"></div>
+            <div class="st-row">
+              <div class="st-dot" id="subDot" style="background:#EFF6FF"><svg stroke="#2563EB" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+              <div style="flex:1"><div style="font-size:14px;font-weight:700">申告書の提出</div><div style="font-size:11px;color:#94A3B8" id="subDate">未提出</div></div>
+            </div>
+            <button class="btn btn-green" id="subBtn" onclick="doSubmit()" style="margin:10px 0 18px">提出済みにする</button>
+            <div class="st-row">
+              <div class="st-dot" id="payDot" style="background:#EFF6FF"><svg stroke="#2563EB" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+              <div style="flex:1"><div style="font-size:14px;font-weight:700">宿泊税の納付</div><div style="font-size:11px;color:#94A3B8" id="payDate">未納付</div></div>
+            </div>
+            <button class="btn btn-blue" id="payBtn" onclick="doPay()" style="margin-top:10px">納付済みにする</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>過去の申告履歴</div>
+          <div class="card-body" id="histList"><div class="empty">履歴がありません</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 設定 -->
+    <div class="screen" id="scr-settings">
+      <div class="sec">
+        <div class="notice notice-red"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>証票番号・課税番号・施設名は役場提出書類に自動反映されます。正確に入力してください。</span></div>
+        <div class="card">
+          <div class="card-hdr"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>宿の基本情報</div>
+          <div class="card-body">
+            <div class="fg"><label class="fl">宿・施設名<span class="req">必須</span></label><input type="text" class="fi" id="set-facility" oninput="markUnsaved()"></div>
+            <div class="fg"><label class="fl">所在地</label><input type="text" class="fi" id="set-address" oninput="markUnsaved()"></div>
+            <div class="fg"><label class="fl">氏名または法人名</label><input type="text" class="fi" id="set-owner" oninput="markUnsaved()"></div>
+            <div class="frow">
+              <div class="fg"><label class="fl">電話番号</label><input type="tel" class="fi" id="set-phone" oninput="markUnsaved()"></div>
+              <div class="fg"><label class="fl">担当者名</label><input type="text" class="fi" id="set-staff" oninput="markUnsaved()"></div>
+            </div>
+            <div class="frow">
+              <div class="fg"><label class="fl">証票番号<span class="req">必須</span></label><input type="text" class="fi" id="set-ticket" oninput="markUnsaved()"><div class="fhint">役場から届いた証票の番号</div></div>
+              <div class="fg"><label class="fl">課税番号<span class="req">必須</span></label><input type="text" class="fi" id="set-taxnum" oninput="markUnsaved()"><div class="fhint">届出時に通知された番号</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>お支払い方法</div>
+          <div class="card-body">
+            <div class="trow"><div><div class="tlabel">Square</div></div><label class="tog"><input type="checkbox" id="set-sq-on" onchange="spTS('sq');markUnsaved()"><span class="tog-sl"></span></label></div>
+            <div id="set-sq-area" style="display:none;padding:6px 0 10px"><input type="url" class="fi" id="set-sq-url" oninput="markUnsaved()"></div>
+            <div class="trow"><div><div class="tlabel">PayPay</div></div><label class="tog"><input type="checkbox" id="set-pp-on" onchange="spTS('pp');markUnsaved()"><span class="tog-sl"></span></label></div>
+            <div id="set-pp-area" style="display:none;padding:6px 0 10px"><input type="url" class="fi" id="set-pp-url" oninput="markUnsaved()"></div>
+            <div class="trow"><div><div class="tlabel">LINE Pay</div></div><label class="tog"><input type="checkbox" id="set-lp-on" onchange="spTS('lp');markUnsaved()"><span class="tog-sl"></span></label></div>
+            <div id="set-lp-area" style="display:none;padding:6px 0 10px"><input type="url" class="fi" id="set-lp-url" oninput="markUnsaved()"></div>
+            <div class="trow"><div><div class="tlabel">銀行振込</div></div><label class="tog"><input type="checkbox" id="set-bank-on" onchange="spTS('bank');markUnsaved()"><span class="tog-sl"></span></label></div>
+            <div id="set-bank-area" style="display:none;padding:6px 0 10px">
+              <div class="fg"><label class="fl">銀行名・支店名</label><input type="text" class="fi" id="set-bank-name" oninput="markUnsaved()"><div class="ferr" id="set-bank-name-err">銀行名を入力してください</div></div>
+              <div class="frow">
+                <div class="fg"><label class="fl">口座種別</label><select class="fs" id="set-bank-type" onchange="markUnsaved()"><option>普通</option><option>当座</option></select></div>
+                <div class="fg"><label class="fl">口座番号（数字のみ）</label><input type="text" class="fi" id="set-bank-num" inputmode="numeric" oninput="markUnsaved()"><div class="ferr" id="set-bank-num-err">数字のみで入力してください</div></div>
+              </div>
+              <div class="fg"><label class="fl">口座名義（カナ）</label><input type="text" class="fi" id="set-bank-holder" oninput="markUnsaved()"><div class="ferr" id="set-bank-holder-err">口座名義を入力してください</div></div>
+            </div>
+            <div class="trow"><div><div class="tlabel">現金（現地払い）</div></div><label class="tog"><input type="checkbox" id="set-cash-on" onchange="markUnsaved()"><span class="tog-sl"></span></label></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>支払いメッセージの定型文</div>
+          <div class="card-body">
+            <div class="notice notice-blue" style="margin-bottom:12px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg><span>使えるキーワード：<strong>{{宿名}} {{税額}} {{チェックイン}} {{チェックアウト}} {{泊数}} {{支払いURL}}</strong></span></div>
+            <div class="fg"><label class="fl">🇯🇵 日本語テンプレート</label>
+              <textarea class="fi" id="set-msg-ja" rows="8" style="resize:vertical;font-size:13px;line-height:1.7" oninput="markUnsaved()"></textarea></div>
+            <div class="fg"><label class="fl">🇬🇧 English Template</label>
+              <textarea class="fi" id="set-msg-en" rows="8" style="resize:vertical;font-size:13px;line-height:1.7" oninput="markUnsaved()"></textarea></div>
+            <button class="btn btn-ghost" onclick="resetMsgTpl()" style="margin-bottom:0;font-size:13px">デフォルトに戻す</button>
+          </div>
+        </div>
+        <button class="btn btn-blue" onclick="saveSettings()">設定を保存する</button>
+        <button class="btn btn-ghost" style="margin-top:8px" onclick="exportBackup()">データをバックアップ（コピー）</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn on" id="tab-home" onclick="tabNav('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>ホーム</span>
+    </button>
+    <button class="tab-btn" id="tab-report" onclick="tabNav('calc')">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>レポート</span>
+    </button>
+    <button class="tab-btn" id="tab-settings" onclick="tabNav('settings')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>設定</span>
+    </button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="bkModal" style="display:none" onclick="closeBkModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-pill"></div>
+    <div class="modal-title" id="modalName"></div>
+    <div class="modal-sub" id="modalInfo"></div>
+    <div id="stepSelect">
+      <div class="btn-row" style="margin-bottom:8px">
+        <button class="btn btn-blue" onclick="showMsgStep()">メッセージで請求</button>
+        <button class="btn btn-out" onclick="showNowStep()">今すぐ決済</button>
+      </div>
+      <button class="btn btn-green" onclick="markPaid()">支払済みにする</button>
+      <button class="btn btn-ghost" style="margin-top:8px" onclick="delBooking()">この予約を削除</button>
+    </div>
+    <div id="stepMsg" style="display:none">
+      <div style="font-size:13px;font-weight:700;color:#334155;margin-bottom:9px">支払い方法を選んでください</div>
+      <div id="msgPayGrid" class="pay-grid"></div>
+      <div id="msgOut" style="display:none;margin-top:14px">
+        <div class="msg-lang">日本語</div><div class="msg-box" id="msgJa"></div>
+        <button class="btn btn-out btn-sm" style="width:100%;margin-bottom:12px" onclick="copyMsg('ja')">コピー</button>
+        <div class="msg-lang">English</div><div class="msg-box" id="msgEn"></div>
+        <button class="btn btn-out btn-sm" style="width:100%;margin-bottom:12px" onclick="copyMsg('en')">Copy</button>
+        <button class="btn btn-green" onclick="markSent()">送信済みにする</button>
+      </div>
+      <button class="btn btn-ghost" style="margin-top:8px" onclick="showSelectStep()">戻る</button>
+    </div>
+    <div id="stepNow" style="display:none">
+      <div style="font-size:13px;font-weight:700;color:#334155;margin-bottom:9px">決済方法を選んでください</div>
+      <div id="nowPayGrid" class="pay-grid"></div>
+      <div id="nowQr" style="display:none">
+        <div class="qr-wrap"><img id="nowQrImg" style="width:180px;height:180px;border-radius:10px" alt="QR">
+          <div class="qr-amt" id="nowQrAmt"></div>
+          <div class="qr-note">ゲストにスキャンしてもらってください</div></div>
+        <button class="btn btn-green" style="margin-top:12px" onclick="markPaid()">支払済みにする</button>
+      </div>
+      <div id="nowBank" style="display:none">
+        <div class="notice notice-blue" id="nowBankInfo" style="margin-top:12px"></div>
+        <button class="btn btn-green" style="margin-top:8px" onclick="markPaid()">支払済みにする</button>
+      </div>
+      <div id="nowCash" style="display:none">
+        <div class="notice notice-blue" style="margin-top:12px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg><span>現金でお支払いをお受け取りください。</span></div>
+        <button class="btn btn-green" style="margin-top:8px" onclick="markCash()">現金受取済みにする</button>
+      </div>
+      <button class="btn btn-ghost" style="margin-top:8px" onclick="showSelectStep()">戻る</button>
+    </div>
+  </div>
+</div>
+
+
+function spT(pre){const on=document.getElementById(pre+'-on').checked;document.getElementById(pre+'-area').style.display=on?'block':'none';}
+function spTS(k){const on=document.getElementById('set-'+k+'-on').checked;document.getElementById('set-'+k+'-area').style.display=on?'block':'none';}
+<script>
+const KEY='hakuba_v7';
+let S=load(),currentBk=null,selPayKey=null,settingsDirty=false;
+function load(){
+  try{const s=localStorage.getItem(KEY);if(s)return JSON.parse(s);}catch(e){}
+  window._isFirstRun=true;
+  for(const k of['hakuba_v6','hakuba_v5','hakuba_v4']){try{const old=localStorage.getItem(k);if(old){const o=JSON.parse(old);o.setup=o.setup||false;return o;}}catch(e){}}
+  return{bookings:[],months:{},facility:'',address:'',owner:'',phone:'',staff:'',ticket:'',taxnum:'',
+    msgTplJa:'【宿泊税のお知らせ】\n{{宿名}} をご利用いただきありがとうございます。\n\n白馬村宿泊税として\n{{チェックイン}}〜{{チェックアウト}}（{{泊数}}泊）分\n合計 {{税額}} をご負担いただきます。\n\nお支払いはこちらからお願いします：\n{{支払いURL}}\n\n※お支払いに問題がある場合や他の決済方法をご希望の方はお気軽にご連絡ください。',
+    msgTplEn:'[Accommodation Tax Notice]\nThank you for staying at {{宿名}}.\n\nHakuba Village accommodation tax for your stay\n({{チェックイン}} – {{チェックアウト}}, {{泊数}} night(s))\n{{税額}} in total.\n\nPlease make your payment here:\n{{支払いURL}}\n\nIf you have any issues or prefer a different payment method, please contact us.',
+    pay:{sq:{on:false,url:''},pp:{on:false,url:''},lp:{on:false,url:''},
+         bank:{on:false,name:'',type:'普通',num:'',holder:''},cash:{on:false}},setup:false};
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(S));}
+
+// Time
+function mk(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+function ml(k){const[y,m]=k.split('-');return`${y}年${parseInt(m)}月`;}
+function thisMl(){return ml(mk());}
+function md(){const k=mk();if(!S.months[k])S.months[k]={submitted:false,submitDate:null,paid:false,paidDate:null};return S.months[k];}
+
+// Tax
+function isNew(ci){return new Date(ci)>=new Date('2029-06-01');}
+function tier(p,ci){const n=isNew(ci);if(p<6000)return{t:'Ba',r:0};if(p<20000)return{t:'a',r:n?300:200};if(p<50000)return{t:'b',r:n?500:400};if(p<100000)return{t:'c',r:n?1000:900};return{t:'d',r:n?2000:1900};}
+function nts(ci,co){if(!ci||!co)return 0;return Math.max(0,Math.round((new Date(co)-new Date(ci))/86400000));}
+function ppp(b){const p=(b.adult||0)+(b.child||0);return p?Math.round((b.price||0)/p):0;}
+function bTax(b){if(b.exempt)return 0;const p=ppp(b);if(p<6000)return 0;return tier(p,b.ci).r*nts(b.ci,b.co)*((b.adult||0)+(b.child||0));}
+function smry(){
+  const s={a:0,b:0,c:0,d:0,Ba:0,Bb:0,tot:0,tax:0},k=mk();
+  S.bookings.filter(b=>b.mk===k).forEach(b=>{
+    const n=nts(b.ci,b.co),p=ppp(b),paid=((b.adult||0)+(b.child||0))*n;
+    if(b.exempt){s.Bb+=paid;return;}const{t}=tier(p,b.ci);
+    if(t==='Ba'){s.Ba+=paid;return;}s[t]+=paid;s.tax+=bTax(b);s.tot+=paid;
+  });return s;
+}
+function rates(ci){const n=isNew(ci||new Date().toISOString().split('T')[0]);return n?{a:300,b:500,c:1000,d:2000}:{a:200,b:400,c:900,d:1900};}
+
+// Nav
+let curScr='home',prevScr='home';
+const scrTitles={input:'予約を追加',payment:'支払い案内',calc:'税額を確認',docs:'PDF出力',nostay:'今月は宿泊なし',status:'月次申告',settings:'設定'};
+function nav(id){
+  const wasTab=(id==='home'||id==='calc'||id==='settings');
+  document.querySelector('.screen.active')?.classList.remove('active');
+  document.getElementById('scr-'+id)?.classList.add('active');
+  prevScr=curScr;curScr=id;
+  document.getElementById('topHdr').style.display=id==='home'?'flex':'none';
+  document.getElementById('subHdr').style.display=id==='home'?'none':'flex';
+  if(id!=='home')document.getElementById('subTitle').textContent=scrTitles[id]||id;
+  document.getElementById('unsavedBar').classList.toggle('show',id==='settings'&&settingsDirty);
+  document.getElementById('screens').scrollTop=0;
+  // tab active
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  if(id==='home')document.getElementById('tab-home').classList.add('on');
+  else if(id==='calc')document.getElementById('tab-report').classList.add('on');
+  else if(id==='settings')document.getElementById('tab-settings').classList.add('on');
+  if(id==='input')restoreDraft();
+  if(id==='payment')renderPayment();
+  if(id==='calc')renderCalc();
+  if(id==='status')renderStatus();
+  if(id==='settings')renderSettings();
+}
+function tabNav(id){nav(id);}
+function goBack(){nav('home');}
+
+// Home
+function updateHome(){
+  const s=smry();
+  document.getElementById('homeAmt').textContent='¥'+s.tax.toLocaleString();
+  document.getElementById('homeMonth').textContent=thisMl()+'分';
+  const m=md();
+  const subPill=document.getElementById('stSubmit'),payPill=document.getElementById('stPay');
+  subPill.textContent=m.submitted?'提出済':'未提出';
+  subPill.className='status-pill '+(m.submitted?'pill-ok':'pill-warn');
+  payPill.textContent=m.paid?'納付済':'未納付';
+  payPill.className='status-pill '+(m.paid?'pill-ok':'pill-warn');
+  const now=new Date(),deadline=new Date(now.getFullYear(),now.getMonth()+1,20);
+  const days=Math.ceil((deadline-now)/86400000);
+  document.getElementById('dlDate').textContent=`${deadline.getMonth()+1}月 ${deadline.getDate()}日`;
+  document.getElementById('dlRemain').textContent=`あと ${days} 日`;
+  const unpaid=S.bookings.filter(b=>b.mk===mk()&&(b.ps==='unpaid'||b.ps==='sent')).length;
+  document.getElementById('unpaidBadge').textContent=unpaid;
+  document.getElementById('unpaidBadge').style.display=unpaid?'block':'none';
+  document.getElementById('payMc').classList.toggle('urgent',unpaid>0);
+  }
+
+// 予約入力
+function populatePay(){
+  const sel=document.getElementById('bk-paymethod');sel.innerHTML='';
+  const ms=activeMethods();
+  if(!ms.length){sel.innerHTML='<option value="none">⚙️ 設定から支払い方法を登録してください</option>';return;}
+  ms.forEach(m=>{const o=document.createElement('option');o.value=m.k;o.textContent=m.label;sel.appendChild(o);});
+}
+function activeMethods(){
+  const m=[];
+  if(S.pay.sq.on)m.push({k:'sq',label:'Square',icon:'🟦',url:S.pay.sq.url});
+  if(S.pay.pp.on)m.push({k:'pp',label:'PayPay',icon:'🔴',url:S.pay.pp.url});
+  if(S.pay.lp.on)m.push({k:'lp',label:'LINE Pay',icon:'🟢',url:S.pay.lp.url});
+  if(S.pay.bank.on)m.push({k:'bank',label:'銀行振込',icon:'🏦'});
+  if(S.pay.cash.on)m.push({k:'cash',label:'現金',icon:'💴'});
+  return m;
+}
+function calcPreview(){
+  const ci=v('bk-ci'),co=v('bk-co'),adult=parseInt(v('bk-adult'))||0,child=parseInt(v('bk-child'))||0;
+  const price=parseInt(v('bk-price'))||0,exempt=document.getElementById('bk-exempt').checked;
+  const n=nts(ci,co);
+  if(!n||!price){document.getElementById('previewAmt').textContent='-- 円';document.getElementById('previewDetail').textContent='';return;}
+  const paid=adult+child;if(!paid){document.getElementById('previewAmt').textContent='0 円（有料宿泊者なし）';return;}
+  const p=Math.round(price/paid);
+  if(exempt||p<6000){document.getElementById('previewAmt').textContent='0 円（課税対象外）';
+    document.getElementById('previewDetail').textContent=p<6000?`1人1泊 ${p.toLocaleString()}円（6,000円未満）`:'課税免除';return;}
+  const{t,r}=tier(p,ci);const tax=r*n*paid;
+  document.getElementById('previewAmt').textContent=tax.toLocaleString()+' 円';
+  document.getElementById('previewDetail').textContent=`区分${t}（${r}円 × ${n}泊 × ${paid}人）　1人1泊 ${p.toLocaleString()}円${isNew(ci)?' ／ 新税率':' ／ 旧税率'}`;
+  saveDraft();
+}
+function saveDraft(){
+  S.bookingDraft={
+    name:v('bk-name'),ci:v('bk-ci'),co:v('bk-co'),
+    adult:v('bk-adult'),child:v('bk-child'),free:v('bk-free'),
+    price:v('bk-price'),source:document.getElementById('bk-source').value,
+    pm:document.getElementById('bk-paymethod').value,
+    exempt:document.getElementById('bk-exempt').checked
+  };save();
+}
+function restoreDraft(){
+  const d=S.bookingDraft||{};
+  if(d.name)document.getElementById('bk-name').value=d.name;
+  if(d.ci)document.getElementById('bk-ci').value=d.ci;
+  if(d.co)document.getElementById('bk-co').value=d.co;
+  if(d.adult)document.getElementById('bk-adult').value=d.adult;
+  if(d.child)document.getElementById('bk-child').value=d.child;
+  if(d.free)document.getElementById('bk-free').value=d.free;
+  if(d.price)document.getElementById('bk-price').value=d.price;
+  if(d.source)document.getElementById('bk-source').value=d.source;
+  if(d.pm)document.getElementById('bk-paymethod').value=d.pm;
+  if(d.exempt!==undefined)document.getElementById('bk-exempt').checked=d.exempt;
+  if(d.price)calcPreview();
+}
+function saveBooking(){
+  const ci=v('bk-ci'),co=v('bk-co'),name=v('bk-name');
+  const adult=parseInt(v('bk-adult'))||0,child=parseInt(v('bk-child'))||0,free=parseInt(v('bk-free'))||0,price=parseInt(v('bk-price'));
+  if(!ci||!co||!price){toast('日付と料金を入力してください');return;}
+  if(nts(ci,co)<=0){toast('チェックアウトはチェックインより後にしてください');return;}
+  if(adult+child===0){toast('有料宿泊者を1人以上入力してください');return;}
+  const b={id:Date.now(),name:name||'ゲスト',ci,co,adult,child,free,price,exempt:document.getElementById('bk-exempt').checked,source:document.getElementById('bk-source').value,pm:document.getElementById('bk-paymethod').value,ps:'unpaid',mk:ci.substring(0,7)};
+  S.bookings.push(b);save();updateHome();toast('予約を保存しました');
+  // フォームクリア（保存後）
+  ['bk-name','bk-price'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('bk-adult').value='1';['bk-child','bk-free'].forEach(id=>document.getElementById(id).value='0');
+  document.getElementById('bk-exempt').checked=false;
+  document.getElementById('previewAmt').textContent='-- 円';document.getElementById('previewDetail').textContent='';
+  S.bookingDraft={};save();
+  openModal(b);
+}
+
+// Payment
+function renderPayment(){
+  const k=mk(),bks=S.bookings.filter(b=>b.mk===k);
+  const unpd=bks.filter(b=>b.ps==='unpaid'||b.ps==='sent'),pd=bks.filter(b=>b.ps==='paid'||b.ps==='cash');
+  document.getElementById('unpaidCount').textContent=unpd.length+'件';
+  renderList('unpaidList',unpd,'未払いの予約はありません');renderList('paidList',pd,'予約がありません');
+}
+function renderList(elId,bks,em){
+  const el=document.getElementById(elId);if(!bks.length){el.innerHTML=`<div class="empty">${em}</div>`;return;}
+  const sm={unpaid:'未払い',sent:'送信済み',paid:'支払済み',cash:'現金受取済み'},sc={unpaid:'st-unpaid',sent:'st-sent',paid:'st-paid',cash:'st-cash'};
+  el.innerHTML=bks.map(b=>`<div class="bk" onclick="openModal(getB(${b.id}))">
+    <div class="bk-row">
+      <div><div class="bk-name">${b.name}</div><div class="bk-meta">${b.ci}〜${b.co}（${nts(b.ci,b.co)}泊）　大人${b.adult}名${b.child?'+子'+b.child:''}${b.free?'+無料'+b.free:''}</div></div>
+      <div style="text-align:right;flex-shrink:0"><div class="bk-tax">¥${bTax(b).toLocaleString()}</div><span class="st ${sc[b.ps]||'st-unpaid'}">${sm[b.ps]||'未払い'}</span></div>
+    </div></div>`).join('');
+}
+function getB(id){return S.bookings.find(b=>b.id===id);}
+
+// Modal
+function openModal(b){
+  if(!b)return;currentBk=b;selPayKey=null;
+  const tax=bTax(b),n=nts(b.ci,b.co);
+  document.getElementById('modalName').textContent=b.name;
+  document.getElementById('modalInfo').innerHTML=`${b.ci}〜${b.co}（${n}泊）　大人${b.adult}名${b.child?'・子ども有料'+b.child+'名':''}${b.free?'・無料添い寝'+b.free+'名':''}<br>宿泊税：<strong style="color:var(--blue-d)">¥${tax.toLocaleString()}</strong>`;
+  showSelectStep();document.getElementById('bkModal').style.display='flex';
+}
+function closeBkModal(){document.getElementById('bkModal').style.display='none';currentBk=null;}
+function showSelectStep(){['stepSelect','stepMsg','stepNow'].forEach((id,i)=>document.getElementById(id).style.display=i===0?'block':'none');}
+function showMsgStep(){
+  ['stepSelect','stepMsg','stepNow'].forEach((id,i)=>document.getElementById(id).style.display=i===1?'block':'none');
+  document.getElementById('msgOut').style.display='none';
+  document.getElementById('msgPayGrid').innerHTML=activeMethods().map(m=>`<div class="pay-card" onclick="selMsgPay('${m.k}',this)"><div class="pay-card-icon">${m.icon}</div><div class="pay-card-name">${m.label}</div></div>`).join('');
+}
+function showNowStep(){
+  ['stepSelect','stepMsg','stepNow'].forEach((id,i)=>document.getElementById(id).style.display=i===2?'block':'none');
+  ['nowQr','nowBank','nowCash'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('nowPayGrid').innerHTML=activeMethods().map(m=>`<div class="pay-card" onclick="selNowPay('${m.k}',this)"><div class="pay-card-icon">${m.icon}</div><div class="pay-card-name">${m.label}</div></div>`).join('');
+}
+function selMsgPay(k,el){selPayKey=k;document.querySelectorAll('#msgPayGrid .pay-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');genMsg(k);document.getElementById('msgOut').style.display='block';}
+function selNowPay(k,el){
+  selPayKey=k;document.querySelectorAll('#nowPayGrid .pay-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');
+  ['nowQr','nowBank','nowCash'].forEach(id=>document.getElementById(id).style.display='none');
+  const tax=bTax(currentBk);
+  if(k==='sq'||k==='pp'||k==='lp'){document.getElementById('nowQrImg').src=`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(S.pay[k].url)}`;document.getElementById('nowQrAmt').textContent='¥'+tax.toLocaleString();document.getElementById('nowQr').style.display='block';}
+  else if(k==='bank'){const bk=S.pay.bank;document.getElementById('nowBankInfo').innerHTML=`<svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--blue)" fill="none" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><span><strong>振込先</strong>　${bk.name}　${bk.type} ${bk.num}　${bk.holder}</span>`;document.getElementById('nowBank').style.display='block';}
+  else if(k==='cash')document.getElementById('nowCash').style.display='block';
+}
+function genMsg(k){
+  if(!currentBk)return;
+  const tax=bTax(currentBk),n=nts(currentBk.ci,currentBk.co),fac=S.facility||'当施設';
+  const ms=activeMethods(),m=ms.find(x=>x.k===k);if(!m)return;
+  let payUrl='',payNote='';
+  if(k==='sq'||k==='pp'||k==='lp'){payUrl=S.pay[k].url;}
+  else if(k==='bank'){const bk=S.pay.bank;payUrl=`${bk.name} ${bk.type} ${bk.num} 名義：${bk.holder}`;}
+  else if(k==='cash'){payUrl='チェックイン時に現金にてお願いします / Please pay cash at check-in.';}
+  const fill=(tpl,lang)=>tpl
+    .replace(/{{宿名}}/g,fac)
+    .replace(/{{チェックイン}}/g,currentBk.ci)
+    .replace(/{{チェックアウト}}/g,currentBk.co)
+    .replace(/{{泊数}}/g,n)
+    .replace(/{{税額}}/g,'¥'+tax.toLocaleString()+(lang==='ja'?' 円':''))
+    .replace(/{{支払いURL}}/g,payUrl)
+    .replace(/{{決済方法}}/g,m.label);
+  const tplJa=S.msgTplJa||'【宿泊税のお知らせ】\n{{宿名}} をご利用いただきありがとうございます。\n\n白馬村宿泊税として\n{{チェックイン}}〜{{チェックアウト}}（{{泊数}}泊）分\n合計 {{税額}} をご負担いただきます。\n\nお支払いはこちらからお願いします：\n{{支払いURL}}\n\n※お支払いに問題がある場合や他の決済方法をご希望の方はお気軽にご連絡ください。';
+  const tplEn=S.msgTplEn||'[Accommodation Tax Notice]\nThank you for staying at {{宿名}}.\n\nHakuba Village accommodation tax for your stay\n({{チェックイン}} – {{チェックアウト}}, {{泊数}} night(s))\n{{税額}} in total.\n\nPlease make your payment here:\n{{支払いURL}}\n\nIf you have any issues or prefer a different payment method, please contact us.';
+  document.getElementById('msgJa').textContent=fill(tplJa,'ja');
+  document.getElementById('msgEn').textContent=fill(tplEn,'en');
+}
+function copyMsg(lang){navigator.clipboard.writeText(document.getElementById(lang==='ja'?'msgJa':'msgEn').textContent).then(()=>toast('コピーしました'));}
+function markSent(){const b=S.bookings.find(x=>x.id===currentBk.id);if(b)b.ps='sent';save();updateHome();closeBkModal();if(curScr==='payment')renderPayment();toast('送信済みとして記録しました');}
+function markPaid(){const b=S.bookings.find(x=>x.id===currentBk.id);if(b)b.ps='paid';save();updateHome();closeBkModal();if(curScr==='payment')renderPayment();if(curScr==='calc')renderCalc();toast('支払済みとして記録しました');}
+function markCash(){const b=S.bookings.find(x=>x.id===currentBk.id);if(b)b.ps='cash';save();updateHome();closeBkModal();if(curScr==='payment')renderPayment();toast('現金受取済みとして記録しました');}
+function delBooking(){S.bookings=S.bookings.filter(x=>x.id!==currentBk.id);save();updateHome();closeBkModal();if(curScr==='payment')renderPayment();if(curScr==='calc')renderCalc();toast('予約を削除しました');}
+
+// Calc
+function renderCalc(){
+  const s=smry(),r=rates();
+  document.getElementById('calcHdr').textContent=thisMl()+'の宿泊税内訳';
+  document.getElementById('rA').textContent=`6千〜2万円（${r.a}円）`;document.getElementById('rB').textContent=`2〜5万円（${r.b}円）`;
+  document.getElementById('rC').textContent=`5〜10万円（${r.c}円）`;document.getElementById('rD').textContent=`10万円〜（${r.d}円）`;
+  ['A','B','C','D'].forEach(t=>{document.getElementById('c'+t).textContent=s[t.toLowerCase()]+'泊';document.getElementById('t'+t).textContent='¥'+(s[t.toLowerCase()]*r[t.toLowerCase()]).toLocaleString();});
+  document.getElementById('cBa').textContent=s.Ba+'泊';document.getElementById('cBb').textContent=s.Bb+'泊';
+  document.getElementById('cTot').textContent=(s.tot+s.Ba+s.Bb)+'泊';document.getElementById('tTot').textContent='¥'+s.tax.toLocaleString();
+  document.getElementById('calcTotal').textContent=s.tax.toLocaleString()+' 円';
+  const k=mk(),bks=S.bookings.filter(b=>b.mk===k),el=document.getElementById('calcList');
+  if(!bks.length){el.innerHTML='<div class="empty">今月の予約がありません</div>';return;}
+  el.innerHTML=bks.map(b=>`<div class="bk" onclick="openModal(getB(${b.id}))"><div class="bk-row"><div><div class="bk-name">${b.name}</div><div class="bk-meta">${b.ci}〜${b.co}（${nts(b.ci,b.co)}泊）${b.adult}名${b.child?'+子'+b.child:''}${b.free?'+無料'+b.free:''}</div></div><div class="bk-tax" style="flex-shrink:0">¥${bTax(b).toLocaleString()}</div></div></div>`).join('');
+}
+
+// Docs
+function buildF2(s,mStr,zero){
+  const r=zero?{a:200,b:400,c:900,d:1900}:rates();
+  const now=new Date(),dStr=`令和${now.getFullYear()-2018}年${now.getMonth()+1}月${now.getDate()}日`;
+  return`<div class="pshoshiki">様式第２号（第５条関係）</div>
+  <div class="pdoc-title">宿 泊 税 納 入 申 告 書</div>
+  <div class="pheader">
+    <div class="pheader-line">${dStr}　　白馬村長　宛</div>
+    <div class="pheader-line">特別徴収義務者（証票番号　${S.ticket||'　　　　　　'}　）</div>
+    <div class="pheader-line">住（居）所（所在地）　${S.address||''}</div>
+    <div class="pheader-line">氏名（法人名）　${S.owner||''}${S.staff?'　担当：'+S.staff:''}</div>
+    <div>電話番号　${S.phone||''}</div>
+    <div style="margin-top:3mm;font-size:8pt">宿泊税の納入について、白馬村宿泊税条例第９条第１項の規定により申告します。</div>
+  </div>
+  <table class="ptable" style="margin-bottom:3mm">
+    <tr><th rowspan="3" style="width:10%">施設</th><th style="width:20%">所在地</th><td colspan="4">${S.address||''}</td></tr>
+    <tr><th>名称又は届出番号</th><td colspan="4">${S.facility||''}</td></tr>
+    <tr><th>課税番号</th><td colspan="4">${S.taxnum||''}</td></tr>
+  </table>
+  <table class="ptable">
+    <tr><th style="width:12%">年月分</th><th colspan="2" style="width:44%">区　　分</th><th style="width:12%">①宿泊数</th><th style="width:14%">②税率</th><th style="width:14%">①×②税額</th></tr>
+    <tr><td rowspan="7" class="pcenter pbold">${mStr}</td><td rowspan="4" class="pcenter" style="font-size:7pt">宿泊料金<br>（１人１泊）</td>
+      <td>a　6,000円以上20,000円未満</td><td class="pcenter">${s.a} 泊</td><td class="pcenter">${r.a}円</td><td class="pright">${(s.a*r.a).toLocaleString()} 円</td></tr>
+    <tr><td>b　20,000円以上50,000円未満</td><td class="pcenter">${s.b} 泊</td><td class="pcenter">${r.b}円</td><td class="pright">${(s.b*r.b).toLocaleString()} 円</td></tr>
+    <tr><td>c　50,000円以上100,000円未満</td><td class="pcenter">${s.c} 泊</td><td class="pcenter">${r.c}円</td><td class="pright">${(s.c*r.c).toLocaleString()} 円</td></tr>
+    <tr><td>d　100,000円以上</td><td class="pcenter">${s.d} 泊</td><td class="pcenter">${r.d}円</td><td class="pright">${(s.d*r.d).toLocaleString()} 円</td></tr>
+    <tr class="ptotal"><td colspan="2">Ａ　課税対象（a＋b＋c＋d）</td><td class="pcenter">${s.tot} 泊</td><td class="pcenter" style="font-size:7pt">納入すべき<br>金額</td><td class="pright pbold" style="font-size:11pt">${s.tax.toLocaleString()} 円</td></tr>
+    <tr><td colspan="2">Ｂ　課税対象外</td><td class="pcenter">${s.Ba+s.Bb} 泊</td><td colspan="2"></td></tr>
+    <tr><td colspan="2">Ｃ　総宿泊数（Ａ＋Ｂ）</td><td class="pcenter">${s.tot+s.Ba+s.Bb} 泊</td><td colspan="2"></td></tr>
+  </table>
+  <div class="pnote">注１　②税率には、県宿泊税（１人１泊につき150円）を含みます。<br>２　課税対象及び課税対象外の宿泊数が宿泊年月日ごとに記載された書類（宿泊税月計表等）を添付してください。<br>３　申告すべき宿泊税額が０円の場合も申告書を提出してください。</div>`;
+}
+function buildMonthly(mStr,zero){
+  const k=zero?null:mk(),bks=zero?[]:S.bookings.filter(b=>b.mk===k),daily={};
+  bks.forEach(b=>{const n=nts(b.ci,b.co);for(let i=0;i<n;i++){const d=new Date(b.ci);d.setDate(d.getDate()+i);const day=d.getDate();if(!daily[day])daily[day]={a:0,b:0,c:0,d:0,Ba:0,Bb:0};const p=ppp(b),paid=(b.adult||0)+(b.child||0);if(b.exempt){daily[day].Bb+=paid;continue;}const{t}=tier(p,b.ci);if(t==='Ba'){daily[day].Ba+=paid;continue;}daily[day][t]+=paid;}});
+  const s=zero?{a:0,b:0,c:0,d:0,Ba:0,Bb:0,tot:0,tax:0}:smry(),r=rates();
+  let rows='';for(let d=1;d<=31;d++){const x=daily[d]||{a:0,b:0,c:0,d:0,Ba:0,Bb:0};const tt=x.a+x.b+x.c+x.d,bt=x.Ba+x.Bb,has=tt>0||bt>0;rows+=`<tr style="${has?'background:#f8f8f8':''}"><td class="pcenter">${d}</td><td class="pcenter">${x.a||''}</td><td class="pcenter">${x.b||''}</td><td class="pcenter">${x.c||''}</td><td class="pcenter">${x.d||''}</td><td class="pcenter">${tt||''}</td><td style="border-left:2px solid #000;padding:0;width:1px"></td><td class="pcenter">${x.Ba||''}</td><td class="pcenter">${x.Bb||''}</td><td class="pcenter">${x.Bb||''}</td><td class="pcenter">${bt||''}</td></tr>`;}
+  return`<div style="text-align:right;font-size:7.5pt;margin-bottom:1mm">（参考様式）</div>
+  <div style="text-align:center;font-size:13pt;font-weight:bold;letter-spacing:3px;margin-bottom:3mm">宿 泊 税 月 計 表　${mStr}</div>
+  <table style="width:100%;border-collapse:collapse;font-size:8pt;margin-bottom:2mm"><tr><td style="border:1px solid #000;padding:1.5mm 2mm;width:35%">課税番号：${S.taxnum||''}</td><td style="border:1px solid #000;padding:1.5mm 2mm">施設の名称又は届出番号：${S.facility||''}</td></tr></table>
+  <table class="ptable" style="font-size:7pt">
+    <thead><tr><th rowspan="2" style="width:6%">日付</th><th colspan="5" style="background:#d0d0d0">Ａ　課税対象宿泊数（${r.a}円/${r.b}円/${r.c}円/${r.d}円）</th><th rowspan="40" style="width:3px;padding:0;border:none;border-left:2px solid #000;border-right:2px solid #000;background:#fff"></th><th colspan="4" style="background:#e0e0e0">Ｂ　課税対象外宿泊数</th></tr>
+    <tr><th style="width:8%">${r.a}円</th><th style="width:8%">${r.b}円</th><th style="width:8%">${r.c}円</th><th style="width:8%">${r.d}円</th><th style="width:6%">計</th><th style="width:9%">a<br>6千円未満</th><th style="width:9%">b<br>課税免除</th><th style="width:9%">うち<br>外国大使等</th><th style="width:7%">計<br>a＋b</th></tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot><tr class="ptotal"><td class="pcenter">計</td><td class="pcenter">${s.a||''}</td><td class="pcenter">${s.b||''}</td><td class="pcenter">${s.c||''}</td><td class="pcenter">${s.d||''}</td><td class="pcenter">${s.tot||''}</td><td style="border:none;padding:0;background:#fff"></td><td class="pcenter">${s.Ba||''}</td><td class="pcenter">${s.Bb||''}</td><td class="pcenter">${s.Bb||''}</td><td class="pcenter">${(s.Ba+s.Bb)||''}</td></tr></tfoot>
+  </table>
+  <div class="pnote">※宿泊税納入申告書の内訳資料として必ず添付してください。記載項目を満たしていれば任意の様式でも結構です。</div>`;
+}
+function buildForm10(s, mStr){
+  const now=new Date();
+  const rn=now.getFullYear()-2018;
+  const dStr=`令和${rn}年${now.getMonth()+1}月${now.getDate()}日`;
+  return`<div class="pshoshiki">様式第10号（第８条関係）</div>
+  <div class="pdoc-title">宿泊税還付（納入義務免除）申請書</div>
+  <div class="pheader">
+    <div class="pheader-line">${dStr}　　白馬村長　宛</div>
+    <div class="pheader-line">特別徴収義務者（証票番号　${S.ticket||'　　　　　　'}　）</div>
+    <div class="pheader-line">住（居）所（所在地）　${S.address||''}</div>
+    <div class="pheader-line">氏名（法人名）　${S.owner||''}</div>
+    <div>電話番号　${S.phone||''}</div>
+    <div style="margin-top:3mm;font-size:8pt">白馬村宿泊税条例第11条第１項の規定により、下記のとおり還付（納入義務の免除）をしてください。</div>
+    <div style="margin-top:2mm;font-size:9pt;font-weight:bold">記</div>
+  </div>
+  <table class="ptable" style="margin-bottom:3mm">
+    <tr><th rowspan="2" style="width:10%">施設</th><th style="width:20%">所在地</th><td colspan="3">${S.address||''}</td></tr>
+    <tr><th>名称又は届出番号</th><td colspan="3">${S.facility||''}</td></tr>
+  </table>
+  <table class="ptable" style="margin-bottom:3mm">
+    <tr>
+      <td style="width:40%">課税対象となる宿泊の総数　<strong>${s.tot||0}</strong> 泊</td>
+      <td>還付又は納入義務の免除を受けようとする額の総額　<strong>${(s.tax||0).toLocaleString()}</strong> 円</td>
+    </tr>
+  </table>
+  <table class="ptable">
+    <tr>
+      <th style="width:35%">区分</th>
+      <th style="width:21%">　　年　　月宿泊分</th>
+      <th style="width:22%">　　年　　月宿泊分</th>
+      <th style="width:22%">　　年　　月宿泊分</th>
+    </tr>
+    <tr><td>還付又は納入義務免除の別</td><td class="pcenter">還付・納入義務の免除</td><td class="pcenter">還付・納入義務の免除</td><td class="pcenter">還付・納入義務の免除</td></tr>
+    <tr><td>課税対象となる宿泊数</td><td class="pcenter">　　　泊</td><td class="pcenter">　　　泊</td><td class="pcenter">　　　泊</td></tr>
+    <tr><td>納入すべき税額</td><td class="pcenter">　　　　　　円</td><td class="pcenter">　　　　　　円</td><td class="pcenter">　　　　　　円</td></tr>
+    <tr><td>納入すべき税額のうち既に納入した税額</td><td class="pcenter">　　　　　　円</td><td class="pcenter">　　　　　　円</td><td class="pcenter">　　　　　　円</td></tr>
+    <tr><td>還付又は納入義務の免除を受けようとする宿泊数</td><td class="pcenter">　　　泊</td><td class="pcenter">　　　泊</td><td class="pcenter">　　　泊</td></tr>
+    <tr><td>還付又は納入義務の免除を受けようとする税額</td><td class="pcenter">　　　　　　円</td><td class="pcenter">　　　　　　円</td><td class="pcenter">　　　　　　円</td></tr>
+    <tr><td colspan="4">還付又は納入義務の免除を受けようとする理由：<br><br><br></td></tr>
+  </table>
+  <div class="pnote" style="margin-top:4mm">
+    （注）１　還付又は納入義務の免除を受けようとする理由を証明する書類を添付してください。<br>
+    ２　住宅宿泊事業に係る施設にあっては、「名称又は届出番号」欄に、住宅宿泊事業法（平成29年法律第65号）第13条の標識に記載された届出番号を記載してください。
+  </div>`;}
+
+function printDocs(){const s=smry(),mStr=thisMl()+'分';let html='';if(document.getElementById('doc-f2').checked)html+=`<div class="page-break">${buildF2(s,mStr,false)}</div>`;if(document.getElementById('doc-monthly').checked)html+=`<div class="page-break">${buildMonthly(mStr,false)}</div>`;
+  if(document.getElementById('doc-f10').checked)html+=`<div>${buildForm10(s,mStr)}</div>`;
+  const pw=document.getElementById('printWrap');
+  pw.style.display='block';
+  document.getElementById('printArea').innerHTML=html;
+  setTimeout(()=>{window.print();pw.style.display='none';},100);}
+function printNoStay(){const zero={a:0,b:0,c:0,d:0,Ba:0,Bb:0,tot:0,tax:0},mStr=thisMl()+'分';const pw2=document.getElementById('printWrap');
+  pw2.style.display='block';
+  document.getElementById('printArea').innerHTML=`<div class="page-break">${buildF2(zero,mStr,true)}</div><div>${buildMonthly(mStr,true)}</div>`;
+  save();setTimeout(()=>{window.print();pw2.style.display='none';toast('0円申告書を作成しました');},100);}
+
+// Status
+function renderStatus(){
+  const m=md();
+  document.getElementById('statusMonth').textContent=thisMl()+'分の申告状況';
+  document.getElementById('subDot').style.background=m.submitted?'var(--green-l)':'var(--blue-l)';
+  document.getElementById('subDate').textContent=m.submitted?`提出日：${m.submitDate}`:'未提出';
+  document.getElementById('subBtn').textContent=m.submitted?'提出済みです':'提出済みにする';document.getElementById('subBtn').disabled=m.submitted;
+  document.getElementById('payDot').style.background=m.paid?'var(--green-l)':'var(--blue-l)';
+  document.getElementById('payDate').textContent=m.paid?`納付日：${m.paidDate}`:'未納付';
+  document.getElementById('payBtn').textContent=m.paid?'納付済みです':'納付済みにする';document.getElementById('payBtn').disabled=m.paid;
+  const keys=Object.keys(S.months).sort().reverse(),el=document.getElementById('histList');
+  if(!keys.length){el.innerHTML='<div class="empty">履歴がありません</div>';return;}
+  el.innerHTML=keys.map(k=>{const m=S.months[k],bks=S.bookings.filter(b=>b.mk===k),tax=bks.reduce((s,b)=>s+bTax(b),0);
+    return`<div class="bk"><div class="bk-row"><div><div class="bk-name">${ml(k)}</div><div class="bk-meta">${bks.length}件</div></div><div style="text-align:right;flex-shrink:0"><div class="bk-tax">¥${tax.toLocaleString()}</div><div style="display:flex;gap:4px;justify-content:flex-end;margin-top:4px"><span class="st ${m.submitted?'st-paid':'st-unpaid'}" style="font-size:10px">${m.submitted?'提出済':'未提出'}</span><span class="st ${m.paid?'st-paid':'st-unpaid'}" style="font-size:10px">${m.paid?'納付済':'未納付'}</span></div></div></div></div>`;
+  }).join('');
+}
+function doSubmit(){const m=md();m.submitted=true;m.submitDate=new Date().toLocaleDateString('ja-JP');save();updateHome();renderStatus();toast('提出済みとして記録しました');}
+function doPay(){const m=md();m.paid=true;m.paidDate=new Date().toLocaleDateString('ja-JP');save();updateHome();renderStatus();toast('納付済みとして記録しました');}
+
+// Settings
+function spToggle(pre){const on=document.getElementById(`${pre}-on`).checked;document.getElementById(`${pre}-area`).style.display=on?'block':'none';}
+function spToggleSet(k){const on=document.getElementById(`set-${k}-on`).checked;document.getElementById(`set-${k}-area`).style.display=on?'block':'none';}
+function markUnsaved(){settingsDirty=true;document.getElementById('unsavedBar').classList.add('show');}
+function renderSettings(){
+  ['facility','address','owner','phone','staff','ticket','taxnum'].forEach(f=>{const el=document.getElementById('set-'+f);if(el)el.value=S[f]||'';});
+  ['sq','pp','lp'].forEach(k=>{document.getElementById(`set-${k}-on`).checked=S.pay[k].on;document.getElementById(`set-${k}-url`).value=S.pay[k].url||'';document.getElementById(`set-${k}-area`).style.display=S.pay[k].on?'block':'none';});
+  const bk=S.pay.bank;document.getElementById('set-bank-on').checked=bk.on;document.getElementById('set-bank-name').value=bk.name||'';document.getElementById('set-bank-type').value=bk.type||'普通';document.getElementById('set-bank-num').value=bk.num||'';document.getElementById('set-bank-holder').value=bk.holder||'';document.getElementById('set-bank-area').style.display=bk.on?'block':'none';
+  document.getElementById('set-cash-on').checked=S.pay.cash.on;
+  const defJa='【宿泊税のお知らせ】\n{{宿名}} をご利用いただきありがとうございます。\n\n白馬村宿泊税として\n{{チェックイン}}〜{{チェックアウト}}（{{泊数}}泊）分\n合計 {{税額}} をご負担いただきます。\n\nお支払いはこちらからお願いします：\n{{支払いURL}}\n\n※お支払いに問題がある場合や他の決済方法をご希望の方はお気軽にご連絡ください。';
+  const defEn='[Accommodation Tax Notice]\nThank you for staying at {{宿名}}.\n\nHakuba Village accommodation tax for your stay\n({{チェックイン}} – {{チェックアウト}}, {{泊数}} night(s))\n{{税額}} in total.\n\nPlease make your payment here:\n{{支払いURL}}\n\nIf you have any issues or prefer a different payment method, please contact us.';
+  document.getElementById('set-msg-ja').value=S.msgTplJa||defJa;
+  document.getElementById('set-msg-en').value=S.msgTplEn||defEn;
+  settingsDirty=false;document.getElementById('unsavedBar').classList.remove('show');
+}
+function validateSettings(){
+  let ok=true;
+  [['set-facility'],['set-ticket'],['set-taxnum']].forEach(([id])=>{const el=document.getElementById(id);if(!el.value.trim()){el.classList.add('err');ok=false;}else el.classList.remove('err');});
+  if(document.getElementById('set-bank-on').checked){const num=document.getElementById('set-bank-num').value;if(num&&!/^\d+$/.test(num)){document.getElementById('set-bank-num').classList.add('err');document.getElementById('set-bank-num-err').classList.add('show');ok=false;}else{document.getElementById('set-bank-num').classList.remove('err');document.getElementById('set-bank-num-err').classList.remove('show');}}
+  return ok;
+}
+function saveSettings(){
+  if(!validateSettings()){toast('必須項目を確認してください');return;}
+  ['facility','address','owner','phone','staff','ticket','taxnum'].forEach(f=>{const el=document.getElementById('set-'+f);if(el)S[f]=el.value.trim();});
+  ['sq','pp','lp'].forEach(k=>{S.pay[k].on=document.getElementById(`set-${k}-on`).checked;S.pay[k].url=document.getElementById(`set-${k}-url`).value.trim();});
+  const bk=S.pay.bank;bk.on=document.getElementById('set-bank-on').checked;bk.name=document.getElementById('set-bank-name').value.trim();bk.type=document.getElementById('set-bank-type').value;bk.num=document.getElementById('set-bank-num').value.trim();bk.holder=document.getElementById('set-bank-holder').value.trim();
+  S.pay.cash.on=document.getElementById('set-cash-on').checked;
+  S.msgTplJa=document.getElementById('set-msg-ja').value;
+  S.msgTplEn=document.getElementById('set-msg-en').value;
+  save();settingsDirty=false;document.getElementById('unsavedBar').classList.remove('show');populatePay();updateHome();toast('設定を保存しました');
+}
+function resetMsgTpl(){
+  const defJa='【宿泊税のお知らせ】\n{{宿名}} をご利用いただきありがとうございます。\n\n白馬村宿泊税として\n{{チェックイン}}〜{{チェックアウト}}（{{泊数}}泊）分\n合計 {{税額}} をご負担いただきます。\n\nお支払いはこちらからお願いします：\n{{支払いURL}}\n\n※お支払いに問題がある場合や他の決済方法をご希望の方はお気軽にご連絡ください。';
+  const defEn='[Accommodation Tax Notice]\nThank you for staying at {{宿名}}.\n\nHakuba Village accommodation tax for your stay\n({{チェックイン}} – {{チェックアウト}}, {{泊数}} night(s))\n{{税額}} in total.\n\nPlease make your payment here:\n{{支払いURL}}\n\nIf you have any issues or prefer a different payment method, please contact us.';
+  document.getElementById('set-msg-ja').value=defJa;
+  document.getElementById('set-msg-en').value=defEn;
+  markUnsaved();toast('デフォルトに戻しました（保存してください）');
+}
+function exportBackup(){navigator.clipboard.writeText(JSON.stringify(S,null,2)).then(()=>toast('データをコピーしました'));}
+
+// Setup
+function saveSetup(){
+  let ok=true;
+  [['su-facility','su-facility-err'],['su-ticket','su-ticket-err'],['su-taxnum','su-taxnum-err']].forEach(([id,eid])=>{const el=document.getElementById(id),err=document.getElementById(eid);if(!el.value.trim()){el.classList.add('err');err.classList.add('show');ok=false;}else{el.classList.remove('err');err.classList.remove('show');}});
+  if(!ok){toast('必須項目を入力してください');return;}
+  const f=id=>document.getElementById(id)?.value.trim()||'';
+  S.facility=f('su-facility');S.address=f('su-address');S.owner=f('su-owner');S.phone=f('su-phone');S.staff=f('su-staff');S.ticket=f('su-ticket');S.taxnum=f('su-taxnum');
+  ['sq','pp','lp'].forEach(k=>{S.pay[k].on=document.getElementById(`su-${k}-on`).checked;S.pay[k].url=f(`su-${k}-url`);});
+  const bk=S.pay.bank;bk.on=document.getElementById('su-bank-on').checked;bk.name=f('su-bank-name');bk.type=document.getElementById('su-bank-type').value;bk.num=f('su-bank-num');bk.holder=f('su-bank-holder');
+  S.pay.cash.on=document.getElementById('su-cash-on').checked;S.setup=true;save();populatePay();updateHome();
+  document.getElementById('setupBg').style.display='none';toast('登録完了！アプリを始めましょう');
+}
+
+// Toast
+let tt;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2800);}
+function v(id){return document.getElementById(id).value;}
+
+// Init
+populatePay();updateHome();
+const td=new Date().toISOString().split('T')[0];
+document.getElementById('bk-ci').value=td;document.getElementById('bk-co').value=td;
+if(window._isFirstRun || !S.setup || !S.facility || !S.ticket || !S.taxnum){
+  // 既存データがあれば初期値として入力
+  const sf=id=>document.getElementById(id);
+  if(S.facility)sf('su-facility').value=S.facility;
+  if(S.address)sf('su-address').value=S.address;
+  if(S.owner)sf('su-owner').value=S.owner;
+  if(S.phone)sf('su-phone').value=S.phone;
+  if(S.staff)sf('su-staff').value=S.staff;
+  if(S.ticket)sf('su-ticket').value=S.ticket;
+  if(S.taxnum)sf('su-taxnum').value=S.taxnum;
+  if(S.pay.sq.on){sf('su-sq-on').checked=true;sf('su-sq-url').value=S.pay.sq.url||'';document.getElementById('su-sq-area').style.display='block';}
+  if(S.pay.pp.on){sf('su-pp-on').checked=true;sf('su-pp-url').value=S.pay.pp.url||'';document.getElementById('su-pp-area').style.display='block';}
+  if(S.pay.lp.on){sf('su-lp-on').checked=true;sf('su-lp-url').value=S.pay.lp.url||'';document.getElementById('su-lp-area').style.display='block';}
+  if(S.pay.bank.on){sf('su-bank-on').checked=true;document.getElementById('su-bank-area').style.display='block';
+    sf('su-bank-name').value=S.pay.bank.name||'';sf('su-bank-type').value=S.pay.bank.type||'普通';
+    sf('su-bank-num').value=S.pay.bank.num||'';sf('su-bank-holder').value=S.pay.bank.holder||'';}
+  if(S.pay.cash.on)sf('su-cash-on').checked=true;
+  document.getElementById('setupBg').style.display='block';
+}
+</script>
+</body>
+</html>
