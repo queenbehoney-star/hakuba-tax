@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="宿泊税">
+<meta name="apple-mobile-web-app-title" content="宿泊税サポート">
 <meta name="theme-color" content="#ffffff">
 <title>白馬村宿泊税かんたん入力サポート</title>
-<link rel="manifest" href="manifest.json">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -303,6 +303,15 @@ body{font-family:var(--font);color:var(--g900);background:var(--g100)}
 .pshoshiki{text-align:right;font-size:7.5pt;margin-bottom:1mm}.pheader{font-size:8.5pt;margin-bottom:4mm;line-height:2}.pheader-line{border-bottom:1px solid #000;margin-bottom:1mm;padding-bottom:1mm}
 .page-break{page-break-after:always}
 </style>
+
+<script>
+// Inline PWA manifest
+const mf={name:'白馬村宿泊税かんたん入力サポート',short_name:'宿泊税',start_url:'.',display:'standalone',theme_color:'#ffffff',background_color:'#F1F5F9',icons:[{src:'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%232563EB%22/><polygon points=%2250,15 15,80 85,80%22 fill=%22white%22/></svg>',sizes:'any',type:'image/svg+xml'}]};
+const blob=new Blob([JSON.stringify(mf)],{type:'application/json'});
+const murl=URL.createObjectURL(blob);
+const ml=document.createElement('link');ml.rel='manifest';ml.href=murl;
+document.head.appendChild(ml);
+</script>
 </head>
 <body>
 
@@ -315,7 +324,7 @@ body{font-family:var(--font);color:var(--g900);background:var(--g100)}
       <div class="setup-logo-ic">
         <svg viewBox="0 0 24 24"><polygon points="12,3 2,20 22,20"/><polygon points="19,9 14,20 24,20" opacity=".45"/></svg>
       </div>
-      <div class="setup-logo-name">白馬 宿泊税サポート</div>
+      <div class="setup-logo-name">白馬村宿泊税かんたん入力サポート</div>
     </div>
     <div class="setup-hero-h">はじめに宿の情報を<br>登録してください</div>
     <div class="setup-hero-p">白馬村の宿泊税申告をスマホだけで完結できます</div>
@@ -403,7 +412,7 @@ body{font-family:var(--font);color:var(--g900);background:var(--g100)}
       <svg viewBox="0 0 24 24"><polygon points="12,3 2,20 22,20"/><polygon points="19,9 14,20 24,20" opacity=".4"/></svg>
     </div>
     <div class="hdr-text">
-      <div class="hdr-title">白馬 宿泊税サポート</div>
+      <div class="hdr-title">白馬村宿泊税かんたん入力サポート</div>
       <div class="hdr-sub">白馬村の宿泊事業者さまをサポートします</div>
     </div>
     <div class="hdr-menu" onclick="nav('settings')">
@@ -726,6 +735,7 @@ body{font-family:var(--font);color:var(--g900);background:var(--g100)}
         </div>
         <button class="btn btn-blue" onclick="saveSettings()">設定を保存する</button>
         <button class="btn btn-ghost" style="margin-top:8px" onclick="exportBackup()">データをバックアップ（コピー）</button>
+        <button class="btn btn-ghost" style="margin-top:8px" onclick="document.getElementById('disclaimerModal').style.display='flex'">免責事項・ご利用案内</button>
       </div>
     </div>
 
@@ -744,6 +754,28 @@ body{font-family:var(--font);color:var(--g900);background:var(--g100)}
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span>設定</span>
     </button>
+  </div>
+</div>
+
+<!-- Disclaimer Modal -->
+<div id="disclaimerModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:400;display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:20px;padding:24px 22px;max-width:380px;width:100%;max-height:85vh;overflow-y:auto">
+    <div style="font-size:18px;font-weight:800;color:#0F172A;margin-bottom:14px">ご利用にあたって</div>
+    <div style="font-size:13px;color:#334155;line-height:1.8;margin-bottom:16px">
+      <p style="margin-bottom:10px">本アプリは白馬村宿泊税の申告業務をサポートするツールです。</p>
+      <p style="margin-bottom:10px">⚠️ <strong>免責事項</strong><br>
+      本アプリが生成する書類・税額はあくまで参考情報です。申告内容は必ずご自身で確認し、不明点は白馬村役場税務課（0261-72-5000）にお問い合わせください。</p>
+      <p style="margin-bottom:10px">📱 <strong>データについて</strong><br>
+      入力データはこの端末のみに保存されます。外部サーバーへの送信は一切行いません。ブラウザのキャッシュを削除するとデータが消えるため、定期的にバックアップをお取りください。</p>
+      <p>🏠 <strong>ホーム画面への追加</strong><br>
+      Safariの場合：画面下の共有ボタン→「ホーム画面に追加」<br>
+      Chromeの場合：右上メニュー→「ホーム画面に追加」</p>
+    </div>
+    <div style="font-size:11px;color:#94A3B8;margin-bottom:16px;padding-top:12px;border-top:1px solid #E2E8F0">
+      制作・サポート：白馬村宿泊税サポートアプリ<br>
+      ご不明な点は白馬村役場税務課 0261-72-5000 まで
+    </div>
+    <button onclick="closeDisclaimer()" style="width:100%;padding:13px;background:#2563EB;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">確認しました</button>
   </div>
 </div>
 
@@ -1203,7 +1235,23 @@ function resetMsgTpl(){
   document.getElementById('set-msg-en').value=defEn;
   markUnsaved();toast('デフォルトに戻しました（保存してください）');
 }
-function exportBackup(){navigator.clipboard.writeText(JSON.stringify(S,null,2)).then(()=>toast('データをコピーしました'));}
+function closeDisclaimer(){
+  document.getElementById('disclaimerModal').style.display='none';
+  toast('登録完了！アプリを始めましょう');
+}
+function exportBackup(){
+  try{
+    const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='hakuba-tax-backup-'+new Date().toISOString().split('T')[0]+'.json';
+    a.click();URL.revokeObjectURL(url);
+    toast('バックアップファイルをダウンロードしました');
+  }catch(e){
+    navigator.clipboard.writeText(JSON.stringify(S,null,2)).then(()=>toast('データをクリップボードにコピーしました'));
+  }
+}
 
 // Setup
 function saveSetup(){
@@ -1215,7 +1263,8 @@ function saveSetup(){
   ['sq','pp','lp'].forEach(k=>{S.pay[k].on=document.getElementById(`su-${k}-on`).checked;S.pay[k].url=f(`su-${k}-url`);});
   const bk=S.pay.bank;bk.on=document.getElementById('su-bank-on').checked;bk.name=f('su-bank-name');bk.type=document.getElementById('su-bank-type').value;bk.num=f('su-bank-num');bk.holder=f('su-bank-holder');
   S.pay.cash.on=document.getElementById('su-cash-on').checked;S.setup=true;save();populatePay();updateHome();
-  document.getElementById('setupBg').style.display='none';toast('登録完了！アプリを始めましょう');
+  document.getElementById('setupBg').style.display='none';
+  document.getElementById('disclaimerModal').style.display='flex';
 }
 
 // Toast
