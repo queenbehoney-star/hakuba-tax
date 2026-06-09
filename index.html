@@ -828,10 +828,9 @@ document.head.appendChild(ml);
 </div>
 
 
-<script>
 function spT(pre){const on=document.getElementById(pre+'-on').checked;document.getElementById(pre+'-area').style.display=on?'block':'none';}
 function spTS(k){const on=document.getElementById('set-'+k+'-on').checked;document.getElementById('set-'+k+'-area').style.display=on?'block':'none';}
-
+<script>
 const KEY='hakuba_v7';
 let S=load(),currentBk=null,selPayKey=null,settingsDirty=false;
 function load(){
@@ -903,9 +902,9 @@ function updateHome(){
   const m=md();
   const subPill=document.getElementById('stSubmit'),payPill=document.getElementById('stPay');
   subPill.textContent=m.submitted?'提出済':'未提出';
-  subPill.className='pill '+(m.submitted?'pill-ok':'pill-warn');
+  subPill.className='status-pill '+(m.submitted?'pill-ok':'pill-warn');
   payPill.textContent=m.paid?'納付済':'未納付';
-  payPill.className='pill '+(m.paid?'pill-ok':'pill-warn');
+  payPill.className='status-pill '+(m.paid?'pill-ok':'pill-warn');
   const now=new Date(),deadline=new Date(now.getFullYear(),now.getMonth()+1,20);
   const days=Math.ceil((deadline-now)/86400000);
   document.getElementById('dlDate').textContent=`${deadline.getMonth()+1}月 ${deadline.getDate()}日`;
