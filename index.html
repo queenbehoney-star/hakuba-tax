@@ -365,7 +365,7 @@ document.head.appendChild(_mlink);
     </div>
 
     <div class="setup-sec">お支払い方法</div>
-    <div class="notice notice-blue" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>銀行振込・現金に対応しています。Square等のQR決済リンクを使う場合は、作成したリンクを請求メッセージに貼り付けてご利用ください。</span></div>
+    <div class="notice notice-blue" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>振込先や支払い情報を設定しておくと、請求メッセージに自動で差し込めます。その他の決済方法をご利用の場合は、メッセージを編集するか、決済QRやリンクを貼り付けてご利用ください。</span></div>
     <div class="card" style="margin-bottom:0">
       <div class="card-body" style="padding:0 4px">
                 <div class="trow"><div><div class="tlabel">銀行振込</div><div class="tsub">口座番号を案内</div></div>
@@ -696,6 +696,7 @@ document.head.appendChild(_mlink);
         <div class="card">
           <div class="card-hdr"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>お支払い方法</div>
           <div class="card-body">
+            <div class="notice notice-blue" style="margin-bottom:12px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>振込先や支払い情報を設定しておくと、請求メッセージに自動で差し込めます。その他の決済方法をご利用の場合は、メッセージを編集するか、決済QRやリンクを貼り付けてご利用ください。</span></div>
             <div class="trow"><div><div class="tlabel">Square</div></div><label class="tog"><input type="checkbox" id="set-sq-on" onchange="spTS('sq');markUnsaved()"><span class="tog-sl"></span></label></div>
             <div id="set-sq-area" style="display:none;padding:6px 0 10px"><input type="url" class="fi" id="set-sq-url" oninput="markUnsaved()"></div>
             <div class="trow"><div><div class="tlabel">PayPay</div></div><label class="tog"><input type="checkbox" id="set-pp-on" onchange="spTS('pp');markUnsaved()"><span class="tog-sl"></span></label></div>
