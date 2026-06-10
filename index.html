@@ -285,14 +285,17 @@ body{font-family:var(--font);color:var(--g900);background:var(--g100)}
 
 /* Print */
 @media print{
-  body{margin:0;padding:0}
+  html,body{margin:0;padding:0;height:auto;overflow:visible}
+  body{background:#fff}
   body > *{display:none!important}
-  #printWrap{display:block!important}
-  #printWrap *{display:unset}
-  #printWrap table{display:table!important}
-  #printWrap tr{display:table-row!important}
-  #printWrap td,#printWrap th{display:table-cell!important}
-  #printWrap div,#printWrap p{display:block!important}
+  #printWrap{display:block!important;position:static!important;inset:auto!important;width:auto!important;height:auto!important;overflow:visible!important;z-index:auto!important}
+  #printWrap *{display:revert}
+  #printWrap table{display:table}
+  #printWrap thead{display:table-header-group}
+  #printWrap tbody{display:table-row-group}
+  #printWrap tr{display:table-row}
+  #printWrap td,#printWrap th{display:table-cell}
+  .page-break{page-break-after:always}
   @page{size:A4 portrait;margin:15mm 15mm 15mm 20mm}
 }
 
@@ -1171,13 +1174,13 @@ function buildForm10(s, mStr){
 function printDocs(){const s=smry(),mStr=thisMl()+'分';let html='';if(document.getElementById('doc-f2').checked)html+=`<div class="page-break">${buildF2(s,mStr,false)}</div>`;if(document.getElementById('doc-monthly').checked)html+=`<div class="page-break">${buildMonthly(mStr,false)}</div>`;
   if(document.getElementById('doc-f10').checked)html+=`<div>${buildForm10(s,mStr)}</div>`;
   const pw=document.getElementById('printWrap');
-  pw.style.display='block';
   document.getElementById('printArea').innerHTML=html;
-  setTimeout(()=>{window.print();pw.style.display='none';},100);}
+  pw.style.display='block';
+  setTimeout(()=>{window.print();setTimeout(()=>{pw.style.display='none';},300);},200);}
 function printNoStay(){const zero={a:0,b:0,c:0,d:0,Ba:0,Bb:0,tot:0,tax:0},mStr=thisMl()+'分';const pw2=document.getElementById('printWrap');
-  pw2.style.display='block';
   document.getElementById('printArea').innerHTML=`<div class="page-break">${buildF2(zero,mStr,true)}</div><div>${buildMonthly(mStr,true)}</div>`;
-  save();setTimeout(()=>{window.print();pw2.style.display='none';toast('0円申告書を作成しました');},100);}
+  pw2.style.display='block';save();
+  setTimeout(()=>{window.print();setTimeout(()=>{pw2.style.display='none';},300);toast('0円申告書を作成しました');},200);}
 
 // Status
 function renderStatus(){
