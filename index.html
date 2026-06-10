@@ -367,18 +367,21 @@ document.head.appendChild(_mlink);
     <div class="setup-sec">お支払い方法</div>
     <div class="card" style="margin-bottom:0">
       <div class="card-body" style="padding:0 4px">
-        <div class="trow"><div><div class="tlabel">Square</div><div class="tsub">QRコード決済</div></div>
+        <div class="trow"><div><div class="tlabel">Square 決済リンク</div><div class="tsub">支払いページのURL</div></div>
           <label class="tog"><input type="checkbox" id="su-sq-on" onchange="spT('su-sq')"><span class="tog-sl"></span></label></div>
         <div id="su-sq-area" style="display:none;padding:6px 0 10px">
-          <input type="url" class="fi" id="su-sq-url" placeholder="https://square.link/u/..."></div>
-        <div class="trow"><div><div class="tlabel">PayPay</div><div class="tsub">QRコード決済</div></div>
+          <input type="url" class="fi" id="su-sq-url" placeholder="https://square.link/u/...">
+          <div class="fhint">Squareで作成した支払いリンクを貼り付けます</div></div>
+        <div class="trow"><div><div class="tlabel">PayPay 決済リンク</div><div class="tsub">支払いページのURL</div></div>
           <label class="tog"><input type="checkbox" id="su-pp-on" onchange="spT('su-pp')"><span class="tog-sl"></span></label></div>
         <div id="su-pp-area" style="display:none;padding:6px 0 10px">
-          <input type="url" class="fi" id="su-pp-url" placeholder="https://qr.paypay.ne.jp/..."></div>
-        <div class="trow"><div><div class="tlabel">LINE Pay</div></div>
+          <input type="url" class="fi" id="su-pp-url" placeholder="https://qr.paypay.ne.jp/...">
+          <div class="fhint">PayPay for Business等の支払いリンクを貼り付けます</div></div>
+        <div class="trow"><div><div class="tlabel">その他の決済リンク</div><div class="tsub">任意のURL</div></div>
           <label class="tog"><input type="checkbox" id="su-lp-on" onchange="spT('su-lp')"><span class="tog-sl"></span></label></div>
         <div id="su-lp-area" style="display:none;padding:6px 0 10px">
-          <input type="url" class="fi" id="su-lp-url" placeholder="https://line.me/pay/..."></div>
+          <input type="url" class="fi" id="su-lp-url" placeholder="https://...">
+          <div class="fhint">その他の決済サービスのリンク</div></div>
         <div class="trow"><div><div class="tlabel">銀行振込</div><div class="tsub">口座番号を案内</div></div>
           <label class="tog"><input type="checkbox" id="su-bank-on" onchange="spT('su-bank')"><span class="tog-sl"></span></label></div>
         <div id="su-bank-area" style="display:none;padding:6px 0 10px">
@@ -711,7 +714,7 @@ document.head.appendChild(_mlink);
             <div id="set-sq-area" style="display:none;padding:6px 0 10px"><input type="url" class="fi" id="set-sq-url" oninput="markUnsaved()"></div>
             <div class="trow"><div><div class="tlabel">PayPay</div></div><label class="tog"><input type="checkbox" id="set-pp-on" onchange="spTS('pp');markUnsaved()"><span class="tog-sl"></span></label></div>
             <div id="set-pp-area" style="display:none;padding:6px 0 10px"><input type="url" class="fi" id="set-pp-url" oninput="markUnsaved()"></div>
-            <div class="trow"><div><div class="tlabel">LINE Pay</div></div><label class="tog"><input type="checkbox" id="set-lp-on" onchange="spTS('lp');markUnsaved()"><span class="tog-sl"></span></label></div>
+            <div class="trow"><div><div class="tlabel">その他の決済リンク</div></div><label class="tog"><input type="checkbox" id="set-lp-on" onchange="spTS('lp');markUnsaved()"><span class="tog-sl"></span></label></div>
             <div id="set-lp-area" style="display:none;padding:6px 0 10px"><input type="url" class="fi" id="set-lp-url" oninput="markUnsaved()"></div>
             <div class="trow"><div><div class="tlabel">銀行振込</div></div><label class="tog"><input type="checkbox" id="set-bank-on" onchange="spTS('bank');markUnsaved()"><span class="tog-sl"></span></label></div>
             <div id="set-bank-area" style="display:none;padding:6px 0 10px">
@@ -789,11 +792,8 @@ document.head.appendChild(_mlink);
     <div class="modal-title" id="modalName"></div>
     <div class="modal-sub" id="modalInfo"></div>
     <div id="stepSelect">
-      <div class="btn-row" style="margin-bottom:8px">
-        <button class="btn btn-blue" onclick="showMsgStep()">メッセージで請求</button>
-        <button class="btn btn-out" onclick="showNowStep()">今すぐ決済</button>
-      </div>
-      <button class="btn btn-green" onclick="markPaid()">支払済みにする</button>
+      <button class="btn btn-blue" onclick="showMsgStep()">支払いメッセージを作成</button>
+      <button class="btn btn-green" style="margin-top:8px" onclick="markPaid()">支払済みにする</button>
       <button class="btn btn-ghost" style="margin-top:8px" onclick="delBooking()">この予約を削除</button>
     </div>
     <div id="stepMsg" style="display:none">
@@ -808,25 +808,7 @@ document.head.appendChild(_mlink);
       </div>
       <button class="btn btn-ghost" style="margin-top:8px" onclick="showSelectStep()">戻る</button>
     </div>
-    <div id="stepNow" style="display:none">
-      <div style="font-size:13px;font-weight:700;color:#334155;margin-bottom:9px">決済方法を選んでください</div>
-      <div id="nowPayGrid" class="pay-grid"></div>
-      <div id="nowQr" style="display:none">
-        <div class="qr-wrap"><img id="nowQrImg" style="width:180px;height:180px;border-radius:10px" alt="QR">
-          <div class="qr-amt" id="nowQrAmt"></div>
-          <div class="qr-note">ゲストにスキャンしてもらってください</div></div>
-        <button class="btn btn-green" style="margin-top:12px" onclick="markPaid()">支払済みにする</button>
-      </div>
-      <div id="nowBank" style="display:none">
-        <div class="notice notice-blue" id="nowBankInfo" style="margin-top:12px"></div>
-        <button class="btn btn-green" style="margin-top:8px" onclick="markPaid()">支払済みにする</button>
-      </div>
-      <div id="nowCash" style="display:none">
-        <div class="notice notice-blue" style="margin-top:12px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg><span>現金でお支払いをお受け取りください。</span></div>
-        <button class="btn btn-green" style="margin-top:8px" onclick="markCash()">現金受取済みにする</button>
-      </div>
-      <button class="btn btn-ghost" style="margin-top:8px" onclick="showSelectStep()">戻る</button>
-    </div>
+    
   </div>
 </div>
 
@@ -928,9 +910,9 @@ function populatePay(){
 }
 function activeMethods(){
   const m=[];
-  if(S.pay.sq.on)m.push({k:'sq',label:'Square',icon:'🟦',url:S.pay.sq.url});
-  if(S.pay.pp.on)m.push({k:'pp',label:'PayPay',icon:'🔴',url:S.pay.pp.url});
-  if(S.pay.lp.on)m.push({k:'lp',label:'LINE Pay',icon:'🟢',url:S.pay.lp.url});
+  if(S.pay.sq.on)m.push({k:'sq',label:'Square決済リンク',icon:'🟦',url:S.pay.sq.url});
+  if(S.pay.pp.on)m.push({k:'pp',label:'PayPay決済リンク',icon:'🔴',url:S.pay.pp.url});
+  if(S.pay.lp.on)m.push({k:'lp',label:'その他の決済',icon:'🔗',url:S.pay.lp.url});
   if(S.pay.bank.on)m.push({k:'bank',label:'銀行振込',icon:'🏦'});
   if(S.pay.cash.on)m.push({k:'cash',label:'現金',icon:'💴'});
   return m;
@@ -1016,26 +998,13 @@ function openModal(b){
   showSelectStep();document.getElementById('bkModal').style.display='flex';
 }
 function closeBkModal(){document.getElementById('bkModal').style.display='none';currentBk=null;}
-function showSelectStep(){['stepSelect','stepMsg','stepNow'].forEach((id,i)=>document.getElementById(id).style.display=i===0?'block':'none');}
+function showSelectStep(){['stepSelect','stepMsg'].forEach((id,i)=>document.getElementById(id).style.display=i===0?'block':'none');}
 function showMsgStep(){
-  ['stepSelect','stepMsg','stepNow'].forEach((id,i)=>document.getElementById(id).style.display=i===1?'block':'none');
+  ['stepSelect','stepMsg'].forEach((id,i)=>document.getElementById(id).style.display=i===1?'block':'none');
   document.getElementById('msgOut').style.display='none';
   document.getElementById('msgPayGrid').innerHTML=activeMethods().map(m=>`<div class="pay-card" onclick="selMsgPay('${m.k}',this)"><div class="pay-card-icon">${m.icon}</div><div class="pay-card-name">${m.label}</div></div>`).join('');
 }
-function showNowStep(){
-  ['stepSelect','stepMsg','stepNow'].forEach((id,i)=>document.getElementById(id).style.display=i===2?'block':'none');
-  ['nowQr','nowBank','nowCash'].forEach(id=>document.getElementById(id).style.display='none');
-  document.getElementById('nowPayGrid').innerHTML=activeMethods().map(m=>`<div class="pay-card" onclick="selNowPay('${m.k}',this)"><div class="pay-card-icon">${m.icon}</div><div class="pay-card-name">${m.label}</div></div>`).join('');
-}
 function selMsgPay(k,el){selPayKey=k;document.querySelectorAll('#msgPayGrid .pay-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');genMsg(k);document.getElementById('msgOut').style.display='block';}
-function selNowPay(k,el){
-  selPayKey=k;document.querySelectorAll('#nowPayGrid .pay-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');
-  ['nowQr','nowBank','nowCash'].forEach(id=>document.getElementById(id).style.display='none');
-  const tax=bTax(currentBk);
-  if(k==='sq'||k==='pp'||k==='lp'){document.getElementById('nowQrImg').src=`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(S.pay[k].url)}`;document.getElementById('nowQrAmt').textContent='¥'+tax.toLocaleString();document.getElementById('nowQr').style.display='block';}
-  else if(k==='bank'){const bk=S.pay.bank;document.getElementById('nowBankInfo').innerHTML=`<svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--blue)" fill="none" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><span><strong>振込先</strong>　${bk.name}　${bk.type} ${bk.num}　${bk.holder}</span>`;document.getElementById('nowBank').style.display='block';}
-  else if(k==='cash')document.getElementById('nowCash').style.display='block';
-}
 function genMsg(k){
   if(!currentBk)return;
   const tax=bTax(currentBk),n=nts(currentBk.ci,currentBk.co),fac=S.facility||'当施設';
