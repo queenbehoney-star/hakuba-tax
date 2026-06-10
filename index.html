@@ -365,24 +365,10 @@ document.head.appendChild(_mlink);
     </div>
 
     <div class="setup-sec">お支払い方法</div>
+    <div class="notice notice-blue" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>銀行振込・現金に対応しています。Square等のQR決済リンクを使う場合は、作成したリンクを請求メッセージに貼り付けてご利用ください。</span></div>
     <div class="card" style="margin-bottom:0">
       <div class="card-body" style="padding:0 4px">
-        <div class="trow"><div><div class="tlabel">Square 決済リンク</div><div class="tsub">支払いページのURL</div></div>
-          <label class="tog"><input type="checkbox" id="su-sq-on" onchange="spT('su-sq')"><span class="tog-sl"></span></label></div>
-        <div id="su-sq-area" style="display:none;padding:6px 0 10px">
-          <input type="url" class="fi" id="su-sq-url" placeholder="https://square.link/u/...">
-          <div class="fhint">Squareで作成した支払いリンクを貼り付けます</div></div>
-        <div class="trow"><div><div class="tlabel">PayPay 決済リンク</div><div class="tsub">支払いページのURL</div></div>
-          <label class="tog"><input type="checkbox" id="su-pp-on" onchange="spT('su-pp')"><span class="tog-sl"></span></label></div>
-        <div id="su-pp-area" style="display:none;padding:6px 0 10px">
-          <input type="url" class="fi" id="su-pp-url" placeholder="https://qr.paypay.ne.jp/...">
-          <div class="fhint">PayPay for Business等の支払いリンクを貼り付けます</div></div>
-        <div class="trow"><div><div class="tlabel">その他の決済リンク</div><div class="tsub">任意のURL</div></div>
-          <label class="tog"><input type="checkbox" id="su-lp-on" onchange="spT('su-lp')"><span class="tog-sl"></span></label></div>
-        <div id="su-lp-area" style="display:none;padding:6px 0 10px">
-          <input type="url" class="fi" id="su-lp-url" placeholder="https://...">
-          <div class="fhint">その他の決済サービスのリンク</div></div>
-        <div class="trow"><div><div class="tlabel">銀行振込</div><div class="tsub">口座番号を案内</div></div>
+                <div class="trow"><div><div class="tlabel">銀行振込</div><div class="tsub">口座番号を案内</div></div>
           <label class="tog"><input type="checkbox" id="su-bank-on" onchange="spT('su-bank')"><span class="tog-sl"></span></label></div>
         <div id="su-bank-area" style="display:none;padding:6px 0 10px">
           <div class="fg"><label class="fl">銀行名・支店名</label>
@@ -1233,7 +1219,6 @@ function saveSetup(){
   if(!ok){toast('必須項目を入力してください');return;}
   const f=id=>document.getElementById(id)?.value.trim()||'';
   S.facility=f('su-facility');S.address=f('su-address');S.owner=f('su-owner');S.phone=f('su-phone');S.staff=f('su-staff');S.ticket=f('su-ticket');S.taxnum=f('su-taxnum');
-  ['sq','pp','lp'].forEach(k=>{S.pay[k].on=document.getElementById(`su-${k}-on`).checked;S.pay[k].url=f(`su-${k}-url`);});
   const bk=S.pay.bank;bk.on=document.getElementById('su-bank-on').checked;bk.name=f('su-bank-name');bk.type=document.getElementById('su-bank-type').value;bk.num=f('su-bank-num');bk.holder=f('su-bank-holder');
   S.pay.cash.on=document.getElementById('su-cash-on').checked;S.setup=true;save();populatePay();updateHome();
   document.getElementById('setupBg').style.display='none';
@@ -1259,9 +1244,6 @@ if(window._isFirstRun || !S.setup || !S.facility || !S.ticket || !S.taxnum){
   if(S.staff)sf('su-staff').value=S.staff;
   if(S.ticket)sf('su-ticket').value=S.ticket;
   if(S.taxnum)sf('su-taxnum').value=S.taxnum;
-  if(S.pay.sq.on){sf('su-sq-on').checked=true;sf('su-sq-url').value=S.pay.sq.url||'';document.getElementById('su-sq-area').style.display='block';}
-  if(S.pay.pp.on){sf('su-pp-on').checked=true;sf('su-pp-url').value=S.pay.pp.url||'';document.getElementById('su-pp-area').style.display='block';}
-  if(S.pay.lp.on){sf('su-lp-on').checked=true;sf('su-lp-url').value=S.pay.lp.url||'';document.getElementById('su-lp-area').style.display='block';}
   if(S.pay.bank.on){sf('su-bank-on').checked=true;document.getElementById('su-bank-area').style.display='block';
     sf('su-bank-name').value=S.pay.bank.name||'';sf('su-bank-type').value=S.pay.bank.type||'普通';
     sf('su-bank-num').value=S.pay.bank.num||'';sf('su-bank-holder').value=S.pay.bank.holder||'';}
