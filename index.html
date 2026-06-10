@@ -859,6 +859,33 @@ document.head.appendChild(_mlink);
         <button class="btn btn-ghost" style="margin-top:8px" onclick="document.getElementById('disclaimerModal').style.display='flex'">免責事項・ご利用案内</button>
       </div>
     </div>
+<!-- 施設選択画面 -->
+<div class="screen" id="scr-facs">
+  <div class="facs-hdr">
+    <div class="facs-hdr-title">🏨 施設を選択</div>
+    <div id="facs-lic-badge" class="facs-lic-badge"></div>
+  </div>
+  <div class="facs-body">
+    <div id="fac-list"></div>
+    <div id="fac-add-card" class="fac-add-card" onclick="toggleFacForm()">
+      <div class="fac-add-icon">＋</div>
+      <span>施設を追加</span>
+    </div>
+    <div id="fac-form" class="fac-form" style="display:none">
+      <div class="fac-form-title">新しい施設を追加</div>
+      <div class="fg"><label class="fl">施設名</label>
+        <input type="text" class="fi" id="fac-new-name" placeholder="例: 白馬山荘"></div>
+      <div class="fg" style="margin-top:10px"><label class="fl">カラー</label>
+        <div class="fac-colors" id="fac-color-picker"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn" style="flex:1;background:#F1F5F9;color:#475569" onclick="toggleFacForm()">キャンセル</button>
+        <button class="btn btn-blue" style="flex:2" onclick="addFac()">追加する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
   </div>
 
@@ -953,33 +980,6 @@ document.head.appendChild(_mlink);
   </div>
 </div>
 
-
-<!-- 施設選択画面 -->
-<div class="screen" id="scr-facs">
-  <div class="facs-hdr">
-    <div class="facs-hdr-title">🏨 施設を選択</div>
-    <div id="facs-lic-badge" class="facs-lic-badge"></div>
-  </div>
-  <div class="facs-body">
-    <div id="fac-list"></div>
-    <div id="fac-add-card" class="fac-add-card" onclick="toggleFacForm()">
-      <div class="fac-add-icon">＋</div>
-      <span>施設を追加</span>
-    </div>
-    <div id="fac-form" class="fac-form" style="display:none">
-      <div class="fac-form-title">新しい施設を追加</div>
-      <div class="fg"><label class="fl">施設名</label>
-        <input type="text" class="fi" id="fac-new-name" placeholder="例: 白馬山荘"></div>
-      <div class="fg" style="margin-top:10px"><label class="fl">カラー</label>
-        <div class="fac-colors" id="fac-color-picker"></div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:14px">
-        <button class="btn" style="flex:1;background:#F1F5F9;color:#475569" onclick="toggleFacForm()">キャンセル</button>
-        <button class="btn btn-blue" style="flex:2" onclick="addFac()">追加する</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
 function spT(pre){const on=document.getElementById(pre+'-on').checked;document.getElementById(pre+'-area').style.display=on?'block':'none';}
