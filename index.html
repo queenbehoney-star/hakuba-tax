@@ -355,7 +355,7 @@ body{font-family:var(--font);color:var(--g900);background:var(--g100)}
 .act-note{font-size:10px;color:#CBD5E1;margin-top:10px;line-height:1.5}
 
 /* 施設選択画面 */
-#scr-facs{background:#F8FAFC;min-height:100vh;display:none;flex-direction:column}
+#scr-facs{background:#F8FAFC;min-height:100%;display:none;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0)}
 #scr-facs.active{display:flex}
 .facs-hdr{background:#fff;padding:20px 16px 12px;border-bottom:1px solid #E2E8F0}
 .facs-hdr-title{font-size:17px;font-weight:800;color:#0F172A}
@@ -1169,7 +1169,7 @@ function updateHome(){
   subPill.className='pill '+(m.submitted?'pill-ok':'pill-warn');
   payPill.textContent=m.paid?'納付済':'未納付';
   payPill.className='pill '+(m.paid?'pill-ok':'pill-warn');
-  const now=new Date(),deadline=new Date(now.getFullYear(),now.getMonth()+1,20);
+  const now=new Date(),deadline=new Date(now.getFullYear(),now.getMonth()+2,0);
   const days=Math.ceil((deadline-now)/86400000);
   document.getElementById('dlDate').textContent=`${deadline.getMonth()+1}月 ${deadline.getDate()}日`;
   document.getElementById('dlRemain').textContent=`あと ${days} 日`;
@@ -1488,6 +1488,7 @@ function resetMsgTpl(){
 function closeDisclaimer(){
   document.getElementById('disclaimerModal').style.display='none';
   toast('登録完了！アプリを始めましょう');
+  nav('home');
 }
 function exportBackup(){
   try{
@@ -1511,7 +1512,7 @@ function saveSetup(){
   const f=id=>document.getElementById(id)?.value.trim()||'';
   S.facility=f('su-facility');S.address=f('su-address');S.owner=f('su-owner');S.phone=f('su-phone');S.staff=f('su-staff');S.ticket=f('su-ticket');S.taxnum=f('su-taxnum');
   const bk=S.pay.bank;bk.on=document.getElementById('su-bank-on').checked;bk.name=f('su-bank-name');bk.type=document.getElementById('su-bank-type').value;bk.num=f('su-bank-num');bk.holder=f('su-bank-holder');
-  S.pay.cash.on=document.getElementById('su-cash-on').checked;S.setup=true;save();populatePay();updateHome();
+  S.pay.cash.on=document.getElementById('su-cash-on').checked;S.setup=true;window._isFirstRun=false;save();populatePay();updateHome();
   document.getElementById('setupBg').style.display='none';
   document.getElementById('disclaimerModal').style.display='flex';
 }
@@ -1546,7 +1547,7 @@ function _startFacility(facId,facs){
   // ヘッダーに施設名を表示
   _updateFacBadge(facs,facId);
   // 初期設定チェック
-  if(window._isFirstRun||!S.setup||!S.facility||!S.ticket||!S.taxnum){
+  if(!S.setup||!S.facility||!S.ticket||!S.taxnum){
     const sf=id=>document.getElementById(id);
     if(S.facility)sf('su-facility').value=S.facility;
     if(S.address)sf('su-address').value=S.address;
@@ -1590,7 +1591,8 @@ function renderFacs(){
   const limit=_facLimit();
   // ライセンスバッジ
   const badge=document.getElementById('facs-lic-badge');
-  if(badge)badge.textContent=lic&&lic.type==='standard'?'スタンダード（最大6施設）':'ライト（1施設）';
+  const usedCount=facs.list.length;
+  if(badge)badge.textContent=(lic&&lic.type==='standard'?'スタンダード':'ライト')+` ${usedCount}/${limit}施設`;
   // 施設リスト
   const listEl=document.getElementById('fac-list');
   if(!facs.list.length){
@@ -1600,7 +1602,10 @@ function renderFacs(){
       <div class="fac-card" onclick="selectFac('${f.id}')">
         <div class="fac-dot" style="background:${f.color}"></div>
         <div class="fac-card-name">${f.name}</div>
-        <div class="fac-card-arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button onclick="event.stopPropagation();delFac('${f.id}')" style="background:none;border:none;color:#CBD5E1;font-size:18px;cursor:pointer;padding:4px" title="削除">🗑</button>
+          <div class="fac-card-arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
       </div>`).join('');
   }
   // 追加ボタンの有効/無効
@@ -1665,6 +1670,21 @@ function selectFac(id){
 function goBackToFacs(){
   save();
   nav('facs');
+}
+
+function delFac(id){
+  if(!confirm('この施設を削除しますか？予約・設定データもすべて削除されます。'))return;
+  const facs=_loadFacs();
+  facs.list=facs.list.filter(f=>f.id!==id);
+  localStorage.removeItem(_facKey(id));
+  if(facs.active===id)facs.active=facs.list.length?facs.list[0].id:null;
+  _saveFacs(facs);
+  if(facs.active){
+    _applyFacData(JSON.parse(localStorage.getItem(_facKey(facs.active))||'null'));
+    save();
+  }
+  renderFacs();
+  toast('施設を削除しました');
 }
 
 // ===== CSV取込 =====
