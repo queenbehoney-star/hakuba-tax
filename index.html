@@ -183,8 +183,6 @@ body{font-family:var(--font);color:var(--g900);background:var(--g100)}
 .btn-ghost{background:#F8FAFC;color:#64748B;border:1px solid #E2E8F0}
 .btn+.btn{margin-top:8px}
 .btn-sm{width:auto;padding:7px 14px;font-size:13px}
-.btn-toggle{flex:1;padding:10px;border:1.5px solid #E2E8F0;border-radius:10px;background:#fff;color:#64748B;font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .15s}
-.btn-toggle.on{border-color:#2563EB;background:#EFF6FF;color:#2563EB}
 .btn-row{display:flex;gap:8px}.btn-row .btn{flex:1}
 
 /* Tax preview */
@@ -307,6 +305,20 @@ body{font-family:var(--font);color:var(--g900);background:var(--g100)}
 .pnote{font-size:7pt;margin-top:3mm;line-height:1.8}.pdoc-title{border:2px solid #000;text-align:center;font-size:13pt;font-weight:bold;padding:3mm;margin-bottom:4mm;letter-spacing:4px}
 .pshoshiki{text-align:right;font-size:7.5pt;margin-bottom:1mm}.pheader{font-size:8.5pt;margin-bottom:4mm;line-height:2}.pheader-line{border-bottom:1px solid #000;margin-bottom:1mm;padding-bottom:1mm}
 .page-break{page-break-after:always}
+
+.helper-box{background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:12px 14px;margin-top:8px;}
+.helper-ota{background:#EFF6FF;border-color:#BFDBFE;}
+.helper-title{font-size:12px;font-weight:700;color:#334155;display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;}
+.helper-title svg{width:14px;height:14px;stroke:#2563EB;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;}
+.helper-note{font-size:11px;color:#64748B;margin:6px 0 8px;line-height:1.5;}
+.helper-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.helper-label{font-size:12px;color:#475569;flex-shrink:0;width:130px;font-weight:500;}
+.helper-input{flex:1;padding:9px 11px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;font-family:var(--font);background:#fff;outline:none;}
+.helper-input:focus{border-color:#2563EB;}
+.helper-unit{font-size:12px;color:#64748B;flex-shrink:0;}
+.helper-result{font-size:12px;color:#2563EB;font-weight:600;margin-bottom:8px;min-height:16px;}
+.helper-btn{padding:8px 14px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;width:100%;}
+.helper-btn:active{opacity:.85;}
 </style>
 
 <script>
@@ -535,27 +547,47 @@ document.head.appendChild(_mlink);
             </div>
             <div class="fsep">宿泊人数</div>
             <div class="frow3">
-              <div class="fg"><label class="fl">大人（有料）</label><input type="number" class="fi" id="bk-adult" value="1" min="0" oninput="calcPreview()"></div>
-              <div class="fg"><label class="fl">子ども有料</label><input type="number" class="fi" id="bk-child" value="0" min="0" oninput="calcPreview()"></div>
+              <div class="fg"><label class="fl">大人（有料）</label><input type="number" class="fi" id="bk-adult" value="1" min="0" oninput="calcPreview();calcRoomHelper();calcOtaHelper()"></div>
+              <div class="fg"><label class="fl">子ども有料</label><input type="number" class="fi" id="bk-child" value="0" min="0" oninput="calcPreview();calcRoomHelper();calcOtaHelper()"></div>
               <div class="fg"><label class="fl">無料添い寝</label><input type="number" class="fi" id="bk-free" value="0" min="0" oninput="calcPreview()"></div>
             </div>
             <div class="fhint" style="margin-top:-8px;margin-bottom:12px">無料添い寝・乳児は宿泊税の計算人数に含みません</div>
-            <div class="fg">
-              <label class="fl">料金の入力方法</label>
-              <div style="display:flex;gap:8px;margin-bottom:8px">
-                <button type="button" class="btn-toggle on" id="pmode-room" onclick="setPriceMode('room')">1室の合計料金</button>
-                <button type="button" class="btn-toggle" id="pmode-person" onclick="setPriceMode('person')">1人1泊の料金</button>
+            <div class="fg"><label class="fl">1人1泊の宿泊料金（税抜・円）</label>
+              <input type="number" class="fi" id="bk-price" placeholder="例: 30000" oninput="calcPreview();calcRoomHelper();calcOtaHelper()">
+              <div class="fhint">1人あたり・1泊あたりの金額を入力（税抜・素泊まり）。6,000円未満は非課税</div></div>
+            <div class="helper-box" id="roomHelper">
+              <div class="helper-title" onclick="toggleHelper('room')">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                一棟・一室まるごと貸しの方はこちら（合計から計算）
+                <svg id="room-arrow" viewBox="0 0 24 24" style="margin-left:auto;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div id="roomHelperBody" style="display:none;margin-top:10px;">
+                <div class="helper-row">
+                  <span class="helper-label">室料合計（1泊・税抜）</span>
+                  <input type="number" class="helper-input" id="h-room-total" placeholder="例: 40000" oninput="calcRoomHelper()">
+                  <span class="helper-unit">円</span>
+                </div>
+                <div class="helper-result" id="h-room-result">合計金額と上の有料人数を入力してください</div>
+                <button class="helper-btn" onclick="applyRoomHelper()">↑ 料金欄に反映</button>
               </div>
             </div>
-            <div class="fg" id="price-room-wrap"><label class="fl">1室1泊の合計料金（円）</label>
-              <input type="number" class="fi" id="bk-price" placeholder="例: 30000" oninput="calcPreview()">
-              <div class="fhint">有料人数で割って1人1泊料金を自動計算します</div></div>
-            <div class="fg" id="price-person-wrap" style="display:none"><label class="fl">1人1泊の料金（円）</label>
-              <input type="number" class="fi" id="bk-price-person" placeholder="例: 10000" oninput="calcPreview()">
-              <div class="fhint">1人あたり1泊の料金をそのまま入力します</div></div>
+            <div class="helper-box helper-ota" id="otaHelper" style="display:none;">
+              <div class="helper-title">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="otaHelperLabel">OTA清掃費を含めた有効宿泊料金を計算</span>
+              </div>
+              <div class="helper-note">清掃費は宿泊料金に含まれます（白馬村手引き）。ゲストサービス料・消費税は含みません。</div>
+              <div class="helper-row">
+                <span class="helper-label">この予約の清掃費</span>
+                <input type="number" class="helper-input" id="h-ota-clean" placeholder="0" oninput="calcOtaHelper()">
+                <span class="helper-unit">円</span>
+              </div>
+              <div class="helper-result" id="h-ota-result">日付・人数・料金を入力すると計算します</div>
+              <button class="helper-btn" onclick="applyOtaHelper()">↑ 有効宿泊料金を料金欄に反映</button>
+            </div>
             <div class="frow">
               <div class="fg"><label class="fl">予約経路</label>
-                <select class="fs" id="bk-source"><option value="direct">直接予約</option><option value="airbnb">Airbnb</option><option value="booking">Booking.com</option><option value="other">その他</option></select></div>
+                <select class="fs" id="bk-source" onchange="onSourceChange()"><option value="direct">直接予約</option><option value="airbnb">Airbnb</option><option value="booking">Booking.com</option><option value="other">その他</option></select></div>
               <div class="fg"><label class="fl">支払い方法</label><select class="fs" id="bk-paymethod"></select></div>
             </div>
             <div class="trow">
@@ -565,7 +597,6 @@ document.head.appendChild(_mlink);
             <div class="tax-prev">
               <div class="tp-lbl">この予約の宿泊税（見込み）</div>
               <div class="tp-amt" id="previewAmt">-- 円</div>
-              <div id="previewPerPerson" style="font-size:13px;font-weight:700;color:#2563EB;margin-top:4px"></div>
               <div class="tp-det" id="previewDetail"></div>
             </div>
             <div style="margin-top:16px">
@@ -710,6 +741,12 @@ document.head.appendChild(_mlink);
           <div class="card-hdr"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>お支払い方法</div>
           <div class="card-body">
             <div class="notice notice-blue" style="margin-bottom:12px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>振込先や支払い情報を設定しておくと、請求メッセージに自動で差し込めます。その他の決済方法をご利用の場合は、メッセージを編集するか、決済QRやリンクを貼り付けてご利用ください。</span></div>
+            <div class="trow"><div><div class="tlabel">Square</div></div><label class="tog"><input type="checkbox" id="set-sq-on" onchange="spTS('sq');markUnsaved()"><span class="tog-sl"></span></label></div>
+            <div id="set-sq-area" style="display:none;padding:6px 0 10px"><input type="url" class="fi" id="set-sq-url" oninput="markUnsaved()"></div>
+            <div class="trow"><div><div class="tlabel">PayPay</div></div><label class="tog"><input type="checkbox" id="set-pp-on" onchange="spTS('pp');markUnsaved()"><span class="tog-sl"></span></label></div>
+            <div id="set-pp-area" style="display:none;padding:6px 0 10px"><input type="url" class="fi" id="set-pp-url" oninput="markUnsaved()"></div>
+            <div class="trow"><div><div class="tlabel">その他の決済リンク</div></div><label class="tog"><input type="checkbox" id="set-lp-on" onchange="spTS('lp');markUnsaved()"><span class="tog-sl"></span></label></div>
+            <div id="set-lp-area" style="display:none;padding:6px 0 10px"><input type="url" class="fi" id="set-lp-url" oninput="markUnsaved()"></div>
             <div class="trow"><div><div class="tlabel">銀行振込</div></div><label class="tog"><input type="checkbox" id="set-bank-on" onchange="spTS('bank');markUnsaved()"><span class="tog-sl"></span></label></div>
             <div id="set-bank-area" style="display:none;padding:6px 0 10px">
               <div class="fg"><label class="fl">銀行名・支店名</label><input type="text" class="fi" id="set-bank-name" oninput="markUnsaved()"><div class="ferr" id="set-bank-name-err">銀行名を入力してください</div></div>
@@ -720,11 +757,6 @@ document.head.appendChild(_mlink);
               <div class="fg"><label class="fl">口座名義（カナ）</label><input type="text" class="fi" id="set-bank-holder" oninput="markUnsaved()"><div class="ferr" id="set-bank-holder-err">口座名義を入力してください</div></div>
             </div>
             <div class="trow"><div><div class="tlabel">現金（現地払い）</div></div><label class="tog"><input type="checkbox" id="set-cash-on" onchange="markUnsaved()"><span class="tog-sl"></span></label></div>
-            <div class="trow"><div><div class="tlabel">その他</div><div class="tsub">決済リンク・QRなど自由に登録</div></div><label class="tog"><input type="checkbox" id="set-lp-on" onchange="spTS('lp');markUnsaved()"><span class="tog-sl"></span></label></div>
-            <div id="set-lp-area" style="display:none;padding:6px 0 10px">
-              <div class="fg"><label class="fl">名称（例：Square、PayPay 等）</label><input type="text" class="fi" id="set-lp-name" placeholder="例: Square決済" oninput="markUnsaved()"></div>
-              <div class="fg"><label class="fl">リンクまたは案内文</label><input type="text" class="fi" id="set-lp-url" placeholder="https://... または案内文" oninput="markUnsaved()"></div>
-            </div>
           </div>
         </div>
         <div class="card">
@@ -736,6 +768,21 @@ document.head.appendChild(_mlink);
             <div class="fg"><label class="fl">🇬🇧 English Template</label>
               <textarea class="fi" id="set-msg-en" rows="8" style="resize:vertical;font-size:13px;line-height:1.7" oninput="markUnsaved()"></textarea></div>
             <button class="btn btn-ghost" onclick="resetMsgTpl()" style="margin-bottom:0;font-size:13px">デフォルトに戻す</button>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px;">
+          <div class="card-hdr"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>予約経路別・清掃費設定（OTA利用の方）</div>
+          <div class="card-body">
+            <div class="notice notice-blue" style="margin-bottom:12px;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>清掃費は宿泊税の課税対象（手引きp.8）。ゲストサービス料・消費税は対象外です。設定しておくと予約入力時に自動計算できます。</span></div>
+            <div class="fg"><label class="fl">Airbnb　清掃費（1予約あたり・税抜）</label><input type="number" class="fi" id="set-pf-airbnb" placeholder="0" oninput="markUnsaved()"><div class="fhint">0円または清掃費なしの場合は空欄</div></div>
+            <div class="fg"><label class="fl">Booking.com　清掃費（1予約あたり・税抜）</label><input type="number" class="fi" id="set-pf-booking" placeholder="0" oninput="markUnsaved()"><div class="fhint">0円または清掃費なしの場合は空欄</div></div>
+            <div class="setup-sec" style="margin-top:8px;margin-bottom:8px;">その他のプラットフォーム（任意）</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div class="fg" style="margin-bottom:0"><label class="fl">名称①</label><input type="text" class="fi" id="set-pf-c1name" placeholder="例: じゃらん" oninput="markUnsaved()"></div>
+              <div class="fg" style="margin-bottom:0"><label class="fl">清掃費①（円）</label><input type="number" class="fi" id="set-pf-c1fee" placeholder="0" oninput="markUnsaved()"></div>
+              <div class="fg" style="margin-bottom:0"><label class="fl">名称②</label><input type="text" class="fi" id="set-pf-c2name" placeholder="例: 楽天トラベル" oninput="markUnsaved()"></div>
+              <div class="fg" style="margin-bottom:0"><label class="fl">清掃費②（円）</label><input type="number" class="fi" id="set-pf-c2fee" placeholder="0" oninput="markUnsaved()"></div>
+            </div>
           </div>
         </div>
         <button class="btn btn-blue" onclick="saveSettings()">設定を保存する</button>
@@ -753,7 +800,7 @@ document.head.appendChild(_mlink);
     </button>
     <button class="tab-btn" id="tab-report" onclick="tabNav('calc')">
       <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      <span>予約レポート</span>
+      <span>レポート</span>
     </button>
     <button class="tab-btn" id="tab-settings" onclick="tabNav('settings')">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -792,38 +839,17 @@ document.head.appendChild(_mlink);
     <div class="modal-sub" id="modalInfo"></div>
     <div id="stepSelect">
       <button class="btn btn-blue" onclick="showMsgStep()">支払いメッセージを作成</button>
-      <button class="btn btn-out" style="margin-top:8px" onclick="showEditStep()">予約を編集する</button>
       <button class="btn btn-green" style="margin-top:8px" onclick="markPaid()">支払済みにする</button>
       <button class="btn btn-ghost" style="margin-top:8px" onclick="delBooking()">この予約を削除</button>
-    </div>
-    <div id="stepEdit" style="display:none">
-      <div class="fg"><label class="fl">ゲスト名</label><input type="text" class="fi" id="ed-name"></div>
-      <div class="frow">
-        <div class="fg"><label class="fl">チェックイン</label><input type="date" class="fi" id="ed-ci"></div>
-        <div class="fg"><label class="fl">チェックアウト</label><input type="date" class="fi" id="ed-co"></div>
-      </div>
-      <div class="frow3">
-        <div class="fg"><label class="fl">大人(有料)</label><input type="number" class="fi" id="ed-adult" min="0"></div>
-        <div class="fg"><label class="fl">子ども有料</label><input type="number" class="fi" id="ed-child" min="0"></div>
-        <div class="fg"><label class="fl">無料添い寝</label><input type="number" class="fi" id="ed-free" min="0"></div>
-      </div>
-      <div class="fg"><label class="fl" id="ed-price-label">1室1泊の合計料金（円）</label><input type="number" class="fi" id="ed-price"></div>
-      <div class="trow"><div><div class="tlabel">課税免除（外国大使等）</div></div>
-        <label class="tog"><input type="checkbox" id="ed-exempt"><span class="tog-sl"></span></label></div>
-      <button class="btn btn-blue" style="margin-top:12px" onclick="saveEdit()">変更を保存</button>
-      <button class="btn btn-ghost" style="margin-top:8px" onclick="showSelectStep()">戻る</button>
     </div>
     <div id="stepMsg" style="display:none">
       <div style="font-size:13px;font-weight:700;color:#334155;margin-bottom:9px">支払い方法を選んでください</div>
       <div id="msgPayGrid" class="pay-grid"></div>
       <div id="msgOut" style="display:none;margin-top:14px">
-        <div class="notice notice-blue" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>文面はそのまま編集できます。決済リンクの貼り付けや一言追加も可能です。</span></div>
-        <div class="msg-lang">日本語</div>
-        <textarea class="fi" id="msgJa" rows="9" style="resize:vertical;font-size:13px;line-height:1.7;margin-bottom:8px"></textarea>
-        <button class="btn btn-out btn-sm" style="width:100%;margin-bottom:12px" onclick="copyMsg('ja')">日本語をコピー</button>
-        <div class="msg-lang">English</div>
-        <textarea class="fi" id="msgEn" rows="9" style="resize:vertical;font-size:13px;line-height:1.7;margin-bottom:8px"></textarea>
-        <button class="btn btn-out btn-sm" style="width:100%;margin-bottom:12px" onclick="copyMsg('en')">Copy English</button>
+        <div class="msg-lang">日本語</div><div class="msg-box" id="msgJa"></div>
+        <button class="btn btn-out btn-sm" style="width:100%;margin-bottom:12px" onclick="copyMsg('ja')">コピー</button>
+        <div class="msg-lang">English</div><div class="msg-box" id="msgEn"></div>
+        <button class="btn btn-out btn-sm" style="width:100%;margin-bottom:12px" onclick="copyMsg('en')">Copy</button>
         <button class="btn btn-green" onclick="markSent()">送信済みにする</button>
       </div>
       <button class="btn btn-ghost" style="margin-top:8px" onclick="showSelectStep()">戻る</button>
@@ -846,8 +872,10 @@ function load(){
   return{bookings:[],months:{},facility:'',address:'',owner:'',phone:'',staff:'',ticket:'',taxnum:'',
     msgTplJa:'【宿泊税のお知らせ】\n{{宿名}} をご利用いただきありがとうございます。\n\n白馬村宿泊税として\n{{チェックイン}}〜{{チェックアウト}}（{{泊数}}泊）分\n合計 {{税額}} をご負担いただきます。\n\nお支払いはこちらからお願いします：\n{{支払いURL}}\n\n※お支払いに問題がある場合や他の決済方法をご希望の方はお気軽にご連絡ください。',
     msgTplEn:'[Accommodation Tax Notice]\nThank you for staying at {{宿名}}.\n\nHakuba Village accommodation tax for your stay\n({{チェックイン}} – {{チェックアウト}}, {{泊数}} night(s))\n{{税額}} in total.\n\nPlease make your payment here:\n{{支払いURL}}\n\nIf you have any issues or prefer a different payment method, please contact us.',
-    pay:{sq:{on:false,url:''},pp:{on:false,url:''},lp:{on:false,name:'その他',url:''},
-         bank:{on:false,name:'',type:'普通',num:'',holder:''},cash:{on:false}},setup:false};
+    pay:{sq:{on:false,url:''},pp:{on:false,url:''},lp:{on:false,url:''},
+         bank:{on:false,name:'',type:'普通',num:'',holder:''},cash:{on:false}},
+    platforms:{airbnb:{cleaningFee:0},booking:{cleaningFee:0},custom1:{name:'',cleaningFee:0},custom2:{name:'',cleaningFee:0}},
+    setup:false};
 }
 function save(){localStorage.setItem(KEY,JSON.stringify(S));}
 
@@ -861,7 +889,7 @@ function md(){const k=mk();if(!S.months[k])S.months[k]={submitted:false,submitDa
 function isNew(ci){return new Date(ci)>=new Date('2029-06-01');}
 function tier(p,ci){const n=isNew(ci);if(p<6000)return{t:'Ba',r:0};if(p<20000)return{t:'a',r:n?300:200};if(p<50000)return{t:'b',r:n?500:400};if(p<100000)return{t:'c',r:n?1000:900};return{t:'d',r:n?2000:1900};}
 function nts(ci,co){if(!ci||!co)return 0;return Math.max(0,Math.round((new Date(co)-new Date(ci))/86400000));}
-function ppp(b){if(b.pricePerson)return b.pricePerson;const p=(b.adult||0)+(b.child||0);return p?Math.round((b.price||0)/p):0;}
+function ppp(b){return parseInt(b.price)||0;}
 function bTax(b){if(b.exempt)return 0;const p=ppp(b);if(p<6000)return 0;return tier(p,b.ci).r*nts(b.ci,b.co)*((b.adult||0)+(b.child||0));}
 function smry(){
   const s={a:0,b:0,c:0,d:0,Ba:0,Bb:0,tot:0,tax:0},k=mk();
@@ -878,7 +906,6 @@ let curScr='home',prevScr='home';
 const scrTitles={input:'予約を追加',payment:'支払い案内',calc:'税額を確認',docs:'PDF出力',nostay:'今月は宿泊なし',status:'月次申告',settings:'設定'};
 function nav(id){
   const wasTab=(id==='home'||id==='calc'||id==='settings');
-  if(curScr==='input'&&id!=='input'){try{saveDraft();}catch(e){}}
   document.querySelector('.screen.active')?.classList.remove('active');
   document.getElementById('scr-'+id)?.classList.add('active');
   prevScr=curScr;curScr=id;
@@ -931,53 +958,38 @@ function populatePay(){
 }
 function activeMethods(){
   const m=[];
+  if(S.pay.sq.on)m.push({k:'sq',label:'Square決済リンク',icon:'🟦',url:S.pay.sq.url});
+  if(S.pay.pp.on)m.push({k:'pp',label:'PayPay決済リンク',icon:'🔴',url:S.pay.pp.url});
+  if(S.pay.lp.on)m.push({k:'lp',label:'その他の決済',icon:'🔗',url:S.pay.lp.url});
   if(S.pay.bank.on)m.push({k:'bank',label:'銀行振込',icon:'🏦'});
   if(S.pay.cash.on)m.push({k:'cash',label:'現金',icon:'💴'});
-  if(S.pay.lp.on)m.push({k:'lp',label:S.pay.lp.name||'その他',icon:'🔗',url:S.pay.lp.url});
   return m;
-}
-function priceMode(){return S.priceMode||'room';}
-function setPriceMode(m){
-  S.priceMode=m;save();
-  document.getElementById('pmode-room').classList.toggle('on',m==='room');
-  document.getElementById('pmode-person').classList.toggle('on',m==='person');
-  document.getElementById('price-room-wrap').style.display=m==='room'?'block':'none';
-  document.getElementById('price-person-wrap').style.display=m==='person'?'block':'none';
-  calcPreview();
-}
-function perPersonPrice(){
-  const adult=parseInt(v('bk-adult'))||0,child=parseInt(v('bk-child'))||0,paid=adult+child;
-  if(priceMode()==='person'){return parseInt(v('bk-price-person'))||0;}
-  const room=parseInt(v('bk-price'))||0;return paid?Math.round(room/paid):0;
 }
 function calcPreview(){
   const ci=v('bk-ci'),co=v('bk-co'),adult=parseInt(v('bk-adult'))||0,child=parseInt(v('bk-child'))||0;
-  const exempt=document.getElementById('bk-exempt').checked;
-  const n=nts(ci,co),paid=adult+child,p=perPersonPrice();
-  const amtEl=document.getElementById('previewAmt'),detEl=document.getElementById('previewDetail'),ppEl=document.getElementById('previewPerPerson');
-  if(!n||!p){amtEl.textContent='-- 円';detEl.textContent='';ppEl.textContent='';return;}
-  if(!paid){amtEl.textContent='0 円';detEl.textContent='有料宿泊者がいません';ppEl.textContent='';return;}
-  ppEl.textContent=`1人1泊あたり ${p.toLocaleString()} 円`;
-  if(exempt||p<6000){amtEl.textContent='0 円';
-    detEl.textContent=p<6000?`6,000円未満のため非課税`:'課税免除のため非課税';saveDraft();return;}
+  const price=parseInt(v('bk-price'))||0,exempt=document.getElementById('bk-exempt').checked;
+  const n=nts(ci,co);
+  if(!n||!price){document.getElementById('previewAmt').textContent='-- 円';document.getElementById('previewDetail').textContent='';return;}
+  const paid=adult+child;if(!paid){document.getElementById('previewAmt').textContent='0 円（有料宿泊者なし）';return;}
+  const p=price;
+  if(exempt||p<6000){document.getElementById('previewAmt').textContent='0 円（課税対象外）';
+    document.getElementById('previewDetail').textContent=p<6000?`1人1泊 ${p.toLocaleString()}円（6,000円未満）`:'課税免除';return;}
   const{t,r}=tier(p,ci);const tax=r*n*paid;
-  amtEl.textContent=tax.toLocaleString()+' 円';
-  detEl.textContent=`区分${t}：1人1泊 ${r}円 × ${paid}人 × ${n}泊${isNew(ci)?'（新税率）':'（旧税率）'}`;
+  document.getElementById('previewAmt').textContent=tax.toLocaleString()+' 円';
+  document.getElementById('previewDetail').textContent=`区分${t}（${r}円 × ${n}泊 × ${paid}人）　1人1泊 ${p.toLocaleString()}円${isNew(ci)?' ／ 新税率':' ／ 旧税率'}`;
   saveDraft();
 }
 function saveDraft(){
   S.bookingDraft={
     name:v('bk-name'),ci:v('bk-ci'),co:v('bk-co'),
     adult:v('bk-adult'),child:v('bk-child'),free:v('bk-free'),
-    price:v('bk-price'),pricePerson:v('bk-price-person'),mode:priceMode(),
-    source:document.getElementById('bk-source').value,
+    price:v('bk-price'),source:document.getElementById('bk-source').value,
     pm:document.getElementById('bk-paymethod').value,
     exempt:document.getElementById('bk-exempt').checked
   };save();
 }
 function restoreDraft(){
   const d=S.bookingDraft||{};
-  if(d.mode)setPriceMode(d.mode);
   if(d.name)document.getElementById('bk-name').value=d.name;
   if(d.ci)document.getElementById('bk-ci').value=d.ci;
   if(d.co)document.getElementById('bk-co').value=d.co;
@@ -985,32 +997,25 @@ function restoreDraft(){
   if(d.child)document.getElementById('bk-child').value=d.child;
   if(d.free)document.getElementById('bk-free').value=d.free;
   if(d.price)document.getElementById('bk-price').value=d.price;
-  if(d.pricePerson)document.getElementById('bk-price-person').value=d.pricePerson;
   if(d.source)document.getElementById('bk-source').value=d.source;
   if(d.pm)document.getElementById('bk-paymethod').value=d.pm;
   if(d.exempt!==undefined)document.getElementById('bk-exempt').checked=d.exempt;
-  calcPreview();
+  if(d.price)calcPreview();
+  onSourceChange();
 }
 function saveBooking(){
   const ci=v('bk-ci'),co=v('bk-co'),name=v('bk-name');
-  const adult=parseInt(v('bk-adult'))||0,child=parseInt(v('bk-child'))||0,free=parseInt(v('bk-free'))||0;
-  const mode=priceMode();
-  const roomPrice=parseInt(v('bk-price'))||0,personPrice=parseInt(v('bk-price-person'))||0;
-  const hasPrice=mode==='room'?roomPrice:personPrice;
-  if(!ci||!co||!hasPrice){toast('日付と料金を入力してください');return;}
+  const adult=parseInt(v('bk-adult'))||0,child=parseInt(v('bk-child'))||0,free=parseInt(v('bk-free'))||0,price=parseInt(v('bk-price'));
+  if(!ci||!co||!price){toast('日付と料金を入力してください');return;}
   if(nts(ci,co)<=0){toast('チェックアウトはチェックインより後にしてください');return;}
   if(adult+child===0){toast('有料宿泊者を1人以上入力してください');return;}
-  const b={id:Date.now(),name:name||'ゲスト',ci,co,adult,child,free,
-    price:mode==='room'?roomPrice:0,
-    pricePerson:mode==='person'?personPrice:0,
-    exempt:document.getElementById('bk-exempt').checked,source:document.getElementById('bk-source').value,pm:document.getElementById('bk-paymethod').value,ps:'unpaid',mk:ci.substring(0,7)};
+  const b={id:Date.now(),name:name||'ゲスト',ci,co,adult,child,free,price,exempt:document.getElementById('bk-exempt').checked,source:document.getElementById('bk-source').value,pm:document.getElementById('bk-paymethod').value,ps:'unpaid',mk:ci.substring(0,7)};
   S.bookings.push(b);save();updateHome();toast('予約を保存しました');
   // フォームクリア（保存後）
-  ['bk-name','bk-price','bk-price-person'].forEach(id=>document.getElementById(id).value='');
+  ['bk-name','bk-price'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('bk-adult').value='1';['bk-child','bk-free'].forEach(id=>document.getElementById(id).value='0');
   document.getElementById('bk-exempt').checked=false;
   document.getElementById('previewAmt').textContent='-- 円';document.getElementById('previewDetail').textContent='';
-  document.getElementById('previewPerPerson').textContent='';
   S.bookingDraft={};save();
   openModal(b);
 }
@@ -1042,45 +1047,9 @@ function openModal(b){
   showSelectStep();document.getElementById('bkModal').style.display='flex';
 }
 function closeBkModal(){document.getElementById('bkModal').style.display='none';currentBk=null;}
-function showSelectStep(){document.getElementById('stepSelect').style.display='block';document.getElementById('stepMsg').style.display='none';document.getElementById('stepEdit').style.display='none';}
-function showEditStep(){
-  if(!currentBk)return;
-  document.getElementById('stepSelect').style.display='none';
-  document.getElementById('stepEdit').style.display='block';
-  document.getElementById('ed-name').value=currentBk.name||'';
-  document.getElementById('ed-ci').value=currentBk.ci||'';
-  document.getElementById('ed-co').value=currentBk.co||'';
-  document.getElementById('ed-adult').value=currentBk.adult||0;
-  document.getElementById('ed-child').value=currentBk.child||0;
-  document.getElementById('ed-free').value=currentBk.free||0;
-  const isPerson=currentBk.pricePerson>0;
-  document.getElementById('ed-price-label').textContent=isPerson?'1人1泊の料金（円）':'1室1泊の合計料金（円）';
-  document.getElementById('ed-price').value=isPerson?currentBk.pricePerson:currentBk.price;
-  document.getElementById('ed-exempt').checked=currentBk.exempt||false;
-}
-function saveEdit(){
-  if(!currentBk)return;
-  const b=S.bookings.find(x=>x.id===currentBk.id);if(!b)return;
-  const ci=document.getElementById('ed-ci').value,co=document.getElementById('ed-co').value;
-  if(!ci||!co||nts(ci,co)<=0){toast('日付を確認してください');return;}
-  const adult=parseInt(document.getElementById('ed-adult').value)||0;
-  const child=parseInt(document.getElementById('ed-child').value)||0;
-  if(adult+child===0){toast('有料宿泊者を1人以上入力してください');return;}
-  const price=parseInt(document.getElementById('ed-price').value)||0;
-  if(!price){toast('料金を入力してください');return;}
-  b.name=document.getElementById('ed-name').value||'ゲスト';
-  b.ci=ci;b.co=co;b.adult=adult;b.child=child;b.free=parseInt(document.getElementById('ed-free').value)||0;
-  b.exempt=document.getElementById('ed-exempt').checked;b.mk=ci.substring(0,7);
-  // keep same price mode as before
-  if(b.pricePerson>0){b.pricePerson=price;b.price=0;}else{b.price=price;b.pricePerson=0;}
-  save();updateHome();currentBk=b;
-  toast('予約を更新しました');
-  closeBkModal();
-  if(curScr==='calc')renderCalc();
-  if(curScr==='payment')renderPayment();
-}
+function showSelectStep(){['stepSelect','stepMsg'].forEach((id,i)=>document.getElementById(id).style.display=i===0?'block':'none');}
 function showMsgStep(){
-  document.getElementById('stepSelect').style.display='none';document.getElementById('stepMsg').style.display='block';document.getElementById('stepEdit').style.display='none';
+  ['stepSelect','stepMsg'].forEach((id,i)=>document.getElementById(id).style.display=i===1?'block':'none');
   document.getElementById('msgOut').style.display='none';
   document.getElementById('msgPayGrid').innerHTML=activeMethods().map(m=>`<div class="pay-card" onclick="selMsgPay('${m.k}',this)"><div class="pay-card-icon">${m.icon}</div><div class="pay-card-name">${m.label}</div></div>`).join('');
 }
@@ -1090,7 +1059,7 @@ function genMsg(k){
   const tax=bTax(currentBk),n=nts(currentBk.ci,currentBk.co),fac=S.facility||'当施設';
   const ms=activeMethods(),m=ms.find(x=>x.k===k);if(!m)return;
   let payUrl='',payNote='';
-  if(k==='lp'){payUrl=S.pay.lp.url;}
+  if(k==='sq'||k==='pp'||k==='lp'){payUrl=S.pay[k].url;}
   else if(k==='bank'){const bk=S.pay.bank;payUrl=`${bk.name} ${bk.type} ${bk.num} 名義：${bk.holder}`;}
   else if(k==='cash'){payUrl='チェックイン時に現金にてお願いします / Please pay cash at check-in.';}
   const fill=(tpl,lang)=>tpl
@@ -1103,10 +1072,10 @@ function genMsg(k){
     .replace(/{{決済方法}}/g,m.label);
   const tplJa=S.msgTplJa||'【宿泊税のお知らせ】\n{{宿名}} をご利用いただきありがとうございます。\n\n白馬村宿泊税として\n{{チェックイン}}〜{{チェックアウト}}（{{泊数}}泊）分\n合計 {{税額}} をご負担いただきます。\n\nお支払いはこちらからお願いします：\n{{支払いURL}}\n\n※お支払いに問題がある場合や他の決済方法をご希望の方はお気軽にご連絡ください。';
   const tplEn=S.msgTplEn||'[Accommodation Tax Notice]\nThank you for staying at {{宿名}}.\n\nHakuba Village accommodation tax for your stay\n({{チェックイン}} – {{チェックアウト}}, {{泊数}} night(s))\n{{税額}} in total.\n\nPlease make your payment here:\n{{支払いURL}}\n\nIf you have any issues or prefer a different payment method, please contact us.';
-  document.getElementById('msgJa').value=fill(tplJa,'ja');
-  document.getElementById('msgEn').value=fill(tplEn,'en');
+  document.getElementById('msgJa').textContent=fill(tplJa,'ja');
+  document.getElementById('msgEn').textContent=fill(tplEn,'en');
 }
-function copyMsg(lang){navigator.clipboard.writeText(document.getElementById(lang==='ja'?'msgJa':'msgEn').value).then(()=>toast('コピーしました'));}
+function copyMsg(lang){navigator.clipboard.writeText(document.getElementById(lang==='ja'?'msgJa':'msgEn').textContent).then(()=>toast('コピーしました'));}
 function markSent(){const b=S.bookings.find(x=>x.id===currentBk.id);if(b)b.ps='sent';save();updateHome();closeBkModal();if(curScr==='payment')renderPayment();toast('送信済みとして記録しました');}
 function markPaid(){const b=S.bookings.find(x=>x.id===currentBk.id);if(b)b.ps='paid';save();updateHome();closeBkModal();if(curScr==='payment')renderPayment();if(curScr==='calc')renderCalc();toast('支払済みとして記録しました');}
 function markCash(){const b=S.bookings.find(x=>x.id===currentBk.id);if(b)b.ps='cash';save();updateHome();closeBkModal();if(curScr==='payment')renderPayment();toast('現金受取済みとして記録しました');}
@@ -1256,16 +1225,22 @@ function spToggleSet(k){const on=document.getElementById(`set-${k}-on`).checked;
 function markUnsaved(){settingsDirty=true;document.getElementById('unsavedBar').classList.add('show');}
 function renderSettings(){
   ['facility','address','owner','phone','staff','ticket','taxnum'].forEach(f=>{const el=document.getElementById('set-'+f);if(el)el.value=S[f]||'';});
-  document.getElementById('set-lp-on').checked=S.pay.lp.on;
-  document.getElementById('set-lp-name').value=S.pay.lp.name||'';
-  document.getElementById('set-lp-url').value=S.pay.lp.url||'';
-  document.getElementById('set-lp-area').style.display=S.pay.lp.on?'block':'none';
+  ['sq','pp','lp'].forEach(k=>{document.getElementById(`set-${k}-on`).checked=S.pay[k].on;document.getElementById(`set-${k}-url`).value=S.pay[k].url||'';document.getElementById(`set-${k}-area`).style.display=S.pay[k].on?'block':'none';});
   const bk=S.pay.bank;document.getElementById('set-bank-on').checked=bk.on;document.getElementById('set-bank-name').value=bk.name||'';document.getElementById('set-bank-type').value=bk.type||'普通';document.getElementById('set-bank-num').value=bk.num||'';document.getElementById('set-bank-holder').value=bk.holder||'';document.getElementById('set-bank-area').style.display=bk.on?'block':'none';
   document.getElementById('set-cash-on').checked=S.pay.cash.on;
   const defJa='【宿泊税のお知らせ】\n{{宿名}} をご利用いただきありがとうございます。\n\n白馬村宿泊税として\n{{チェックイン}}〜{{チェックアウト}}（{{泊数}}泊）分\n合計 {{税額}} をご負担いただきます。\n\nお支払いはこちらからお願いします：\n{{支払いURL}}\n\n※お支払いに問題がある場合や他の決済方法をご希望の方はお気軽にご連絡ください。';
   const defEn='[Accommodation Tax Notice]\nThank you for staying at {{宿名}}.\n\nHakuba Village accommodation tax for your stay\n({{チェックイン}} – {{チェックアウト}}, {{泊数}} night(s))\n{{税額}} in total.\n\nPlease make your payment here:\n{{支払いURL}}\n\nIf you have any issues or prefer a different payment method, please contact us.';
   document.getElementById('set-msg-ja').value=S.msgTplJa||defJa;
   document.getElementById('set-msg-en').value=S.msgTplEn||defEn;
+  const pf=S.platforms||{};
+  const pfld=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
+  pfld('set-pf-airbnb',pf.airbnb?.cleaningFee||'');
+  pfld('set-pf-booking',pf.booking?.cleaningFee||'');
+  pfld('set-pf-c1name',pf.custom1?.name||'');
+  pfld('set-pf-c1fee',pf.custom1?.cleaningFee||'');
+  pfld('set-pf-c2name',pf.custom2?.name||'');
+  pfld('set-pf-c2fee',pf.custom2?.cleaningFee||'');
+  updateSourceOptions();
   settingsDirty=false;document.getElementById('unsavedBar').classList.remove('show');
 }
 function validateSettings(){
@@ -1274,17 +1249,115 @@ function validateSettings(){
   if(document.getElementById('set-bank-on').checked){const num=document.getElementById('set-bank-num').value;if(num&&!/^\d+$/.test(num)){document.getElementById('set-bank-num').classList.add('err');document.getElementById('set-bank-num-err').classList.add('show');ok=false;}else{document.getElementById('set-bank-num').classList.remove('err');document.getElementById('set-bank-num-err').classList.remove('show');}}
   return ok;
 }
+
+// ── Platform / Helper functions ──
+function onSourceChange(){
+  const src=document.getElementById('bk-source').value;
+  const pf=S.platforms||{};
+  let cleanFee=0,label='';
+  if(src==='airbnb'){cleanFee=pf.airbnb?.cleaningFee||0;label='Airbnb';}
+  else if(src==='booking'){cleanFee=pf.booking?.cleaningFee||0;label='Booking.com';}
+  else if(src==='custom1'&&pf.custom1?.name){cleanFee=pf.custom1?.cleaningFee||0;label=pf.custom1.name;}
+  else if(src==='custom2'&&pf.custom2?.name){cleanFee=pf.custom2?.cleaningFee||0;label=pf.custom2.name;}
+  const isOta=(src==='airbnb'||src==='booking'||(src==='custom1'&&pf.custom1?.name)||(src==='custom2'&&pf.custom2?.name));
+  const el=document.getElementById('otaHelper');
+  if(el){
+    el.style.display=isOta?'block':'none';
+    if(isOta){
+      document.getElementById('otaHelperLabel').textContent=label+'：清掃費を含めた有効宿泊料金を計算';
+      const ci=document.getElementById('h-ota-clean');if(ci&&!ci.value)ci.value=cleanFee||'';
+      calcOtaHelper();
+    }
+  }
+  calcPreview();
+}
+function toggleHelper(type){
+  const body=document.getElementById(type+'HelperBody');
+  const arrow=document.getElementById(type+'-arrow');
+  if(!body)return;
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  if(arrow)arrow.style.transform=open?'':'rotate(180deg)';
+}
+function calcRoomHelper(){
+  const total=parseInt(document.getElementById('h-room-total')?.value)||0;
+  const adult=parseInt(v('bk-adult'))||0;
+  const child=parseInt(v('bk-child'))||0;
+  const paid=adult+child;
+  const el=document.getElementById('h-room-result');
+  if(!el)return;
+  if(!total||!paid){el.textContent='合計金額と上の有料人数を入力してください';return;}
+  const per=Math.round(total/paid);
+  el.textContent='1人1泊の宿泊料金：'+per.toLocaleString()+'円　'+(per<6000?'（6,000円未満→非課税）':'（課税対象）');
+}
+function applyRoomHelper(){
+  const total=parseInt(document.getElementById('h-room-total')?.value)||0;
+  const adult=parseInt(v('bk-adult'))||0;
+  const child=parseInt(v('bk-child'))||0;
+  const paid=adult+child;
+  if(!total||!paid){toast('合計金額と有料人数を入力してください');return;}
+  const per=Math.round(total/paid);
+  document.getElementById('bk-price').value=per;
+  calcPreview();
+  toast('料金欄に反映しました（'+per.toLocaleString()+'円）');
+}
+function calcOtaHelper(){
+  const basePrice=parseInt(v('bk-price'))||0;
+  const cleanFee=parseInt(document.getElementById('h-ota-clean')?.value)||0;
+  const ci=v('bk-ci'),co=v('bk-co');
+  const adult=parseInt(v('bk-adult'))||0;
+  const child=parseInt(v('bk-child'))||0;
+  const paid=adult+child;
+  const nights=nts(ci,co);
+  const el=document.getElementById('h-ota-result');
+  if(!el)return;
+  if(!basePrice||!nights||!paid){el.textContent='日付・人数・料金を入力すると計算します';return;}
+  if(!cleanFee){el.textContent='清掃費なし：料金欄の値がそのまま使用されます（'+basePrice.toLocaleString()+'円）';return;}
+  const eff=Math.round((basePrice*nights+cleanFee)/nights/paid);
+  el.textContent='有効宿泊料金：'+eff.toLocaleString()+'円/人/泊（清掃費'+cleanFee.toLocaleString()+'円÷'+nights+'泊÷'+paid+'人を加算）';
+}
+function applyOtaHelper(){
+  const basePrice=parseInt(v('bk-price'))||0;
+  const cleanFee=parseInt(document.getElementById('h-ota-clean')?.value)||0;
+  const ci=v('bk-ci'),co=v('bk-co');
+  const adult=parseInt(v('bk-adult'))||0;
+  const child=parseInt(v('bk-child'))||0;
+  const paid=adult+child;
+  const nights=nts(ci,co);
+  if(!basePrice||!nights||!paid){toast('日付・人数・料金を入力してください');return;}
+  const eff=Math.round((basePrice*nights+cleanFee)/nights/paid);
+  document.getElementById('bk-price').value=eff;
+  calcPreview();
+  toast('有効宿泊料金を反映しました（'+eff.toLocaleString()+'円）');
+}
+function updateSourceOptions(){
+  const sel=document.getElementById('bk-source');
+  if(!sel)return;
+  const pf=S.platforms||{};
+  // remove old custom options (value=custom1/custom2)
+  for(let i=sel.options.length-1;i>=0;i--){
+    if(sel.options[i].value==='custom1'||sel.options[i].value==='custom2')sel.remove(i);
+  }
+  if(pf.custom1?.name){const o=document.createElement('option');o.value='custom1';o.textContent=pf.custom1.name;sel.add(o);}
+  if(pf.custom2?.name){const o=document.createElement('option');o.value='custom2';o.textContent=pf.custom2.name;sel.add(o);}
+}
+
 function saveSettings(){
   if(!validateSettings()){toast('必須項目を確認してください');return;}
   ['facility','address','owner','phone','staff','ticket','taxnum'].forEach(f=>{const el=document.getElementById('set-'+f);if(el)S[f]=el.value.trim();});
-  S.pay.lp.on=document.getElementById('set-lp-on').checked;
-  S.pay.lp.name=document.getElementById('set-lp-name').value.trim()||'その他';
-  S.pay.lp.url=document.getElementById('set-lp-url').value.trim();
+  ['sq','pp','lp'].forEach(k=>{S.pay[k].on=document.getElementById(`set-${k}-on`).checked;S.pay[k].url=document.getElementById(`set-${k}-url`).value.trim();});
   const bk=S.pay.bank;bk.on=document.getElementById('set-bank-on').checked;bk.name=document.getElementById('set-bank-name').value.trim();bk.type=document.getElementById('set-bank-type').value;bk.num=document.getElementById('set-bank-num').value.trim();bk.holder=document.getElementById('set-bank-holder').value.trim();
   S.pay.cash.on=document.getElementById('set-cash-on').checked;
   S.msgTplJa=document.getElementById('set-msg-ja').value;
   S.msgTplEn=document.getElementById('set-msg-en').value;
-  save();settingsDirty=false;document.getElementById('unsavedBar').classList.remove('show');populatePay();updateHome();toast('設定を保存しました');
+  if(!S.platforms)S.platforms={airbnb:{cleaningFee:0},booking:{cleaningFee:0},custom1:{name:'',cleaningFee:0},custom2:{name:'',cleaningFee:0}};
+  S.platforms.airbnb.cleaningFee=parseInt(document.getElementById('set-pf-airbnb')?.value)||0;
+  S.platforms.booking.cleaningFee=parseInt(document.getElementById('set-pf-booking')?.value)||0;
+  S.platforms.custom1.name=(document.getElementById('set-pf-c1name')?.value||'').trim();
+  S.platforms.custom1.cleaningFee=parseInt(document.getElementById('set-pf-c1fee')?.value)||0;
+  S.platforms.custom2.name=(document.getElementById('set-pf-c2name')?.value||'').trim();
+  S.platforms.custom2.cleaningFee=parseInt(document.getElementById('set-pf-c2fee')?.value)||0;
+  save();settingsDirty=false;document.getElementById('unsavedBar').classList.remove('show');populatePay();updateHome();updateSourceOptions();toast('設定を保存しました');
 }
 function resetMsgTpl(){
   const defJa='【宿泊税のお知らせ】\n{{宿名}} をご利用いただきありがとうございます。\n\n白馬村宿泊税として\n{{チェックイン}}〜{{チェックアウト}}（{{泊数}}泊）分\n合計 {{税額}} をご負担いただきます。\n\nお支払いはこちらからお願いします：\n{{支払いURL}}\n\n※お支払いに問題がある場合や他の決済方法をご希望の方はお気軽にご連絡ください。';
@@ -1333,7 +1406,6 @@ function v(id){return document.getElementById(id).value;}
 populatePay();updateHome();
 const td=new Date().toISOString().split('T')[0];
 document.getElementById('bk-ci').value=td;document.getElementById('bk-co').value=td;
-setPriceMode(S.priceMode||'room');
 if(window._isFirstRun || !S.setup || !S.facility || !S.ticket || !S.taxnum){
   // 既存データがあれば初期値として入力
   const sf=id=>document.getElementById(id);
